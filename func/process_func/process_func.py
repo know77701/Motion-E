@@ -42,10 +42,8 @@ class ProcessFunc():
         # DashBoard.dashboard_starter(dto)
         # window_screen_shot("FAIL")
         # DashBoard.notice_create(motion_window)
-        # DashBoard.notice_create(motion_window)
-        DashBoard.notice_delete(motion_window,motion_app)
-
-        # ChartFunc.chart_starter()
+        # DashBoard.notice_delete(motion_window,motion_app)
+        ChartFunc.chart_starter()
 
     def sub_process_func(start_sub_process_event, sub_process_done_event):
         start_sub_process_event.wait()
