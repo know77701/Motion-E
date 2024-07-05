@@ -467,13 +467,10 @@ class ChartFunc():
             for items in sec_i.children():
                 if items.element_info.control_type == "Pane":
                     list_view_btn = items.children()
-
-        list_view_btn[0].click()
-
-        for sec_i in sec_child_list:
-            for items in sec_i.children():
                 if items.element_info.control_type == "Custom":
                     rsrv_list.append(items)
+
+        list_view_btn[0].click()
 
         random_rsrv_list = random.choice(rsrv_list)
         random_rsrv_list.click_input()
@@ -488,16 +485,9 @@ class ChartFunc():
         # for list in cancle_window.children():
         #     print(list)
 
-    def rsrv_create():
+    def rsrv_save():
         return
 
-    def cons_create():
-        cons_window = ChartFunc.return_window(auto_id="상담")
-
-        ChartFunc.explore_children(
-            cons_window, depth=0, max_depth=6, index_number=6)
-        print(ChartFunc.explore_child_list[0].children())
-        print(ChartFunc.explore_child_list[1].children())
-        print(ChartFunc.explore_child_list[2].children())
-        print(ChartFunc.explore_child_list[3].children())
-        print(ChartFunc.explore_child_list[4].children())
+    def receipt_save():
+        receipt_window = ChartFunc.return_window(auto_id="진료")
+        return
