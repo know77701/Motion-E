@@ -14,7 +14,7 @@ class DashBoard():
     """
     RETRIES = 0
     MAX_RETRY = 3
-    notice_content = ["테스트","TEST","CHECK NOTICE"]
+    notice_content = ["테스트","TEST","CHECK NOTICE","안드로이드","아이오에스"]
     content_random = random.choice(notice_content)
 
     def dashboard_starter(dto: DashboardDto):
@@ -67,7 +67,7 @@ class DashBoard():
         DashBoard.save_receipt_popup(dto)
         
         # 환자차트 진입
-        DashBoard.view_user_chart(dto.motion_window, 3, dto.chart_number)
+        DashBoard.view_user_chart(dto.motion_window, 1, dto.chart_number)
         
         ChartFunc.chart_starter()
 
@@ -99,12 +99,13 @@ class DashBoard():
                 if window_list.element_info.automation_id == "menuBar":
                     for item in window_list.children():
                         if item.element_info.control_type == "MenuItem" and item.element_info.name == "Dashboard":
-                            item.select()
-                if window_list.element_info.automation_id == "TitleBar":
-                    for item in window_list.children():
-                        if window_list.elemen_info.automation_id == "Maximize-Restore" and item.element.control_type == "Button":
-                            item.click()
-                            break
+                            item.click_input()
+            if windows.element_info.control_type == "TitleBar":
+                for item in windows.children():
+                    if item.element_info.name == "최대화" and item.element_info.control_type == "Button":
+                        item.click()
+                        break
+        keyboard.send_keys("{F5}")
         print("리셋 함수 종료")
         time.sleep(2)
 
@@ -123,7 +124,9 @@ class DashBoard():
             for notice_group in notice_view:
                 if notice_group.element_info.control_type == "Edit":
                     notice_group.set_text(DashBoard.content_random)
-                    keyboard.send_keys("{ENTER}")                    
+                    time.sleep(1)
+                    keyboard.send_keys("{ENTER}") 
+                    print("테스트")                
             time.sleep(1)
         except Exception as err:
             keyboard.send_keys('{F5}')
@@ -141,56 +144,35 @@ class DashBoard():
                     notice_list.append(window_group)
             notice_view = notice_list[0].children()
             
+            random_item = []
             print(DashBoard.content_random)
             for window_item in notice_view:
                 if window_item.element_info.control_type == "List":
-                    # notice_list.append(window_item)
+                    notice_list.append(window_item)
                     for list_item in window_item.children():
                         for select_item in list_item.children():
                             if select_item.element_info.control_type == "Text" and select_item.element_info.name == DashBoard.content_random:
-                                for delete_item in list_item.children():
-                                    if delete_item.element_info.control_type == "Button" and delete_item.element_info.name == "닫기":
-                                        delete_item.click()
+                                random_item.append(list_item.children())
+                                
+            random_select = random.choice(random_item)
+            print(random_select)
+            for delete_item in random_select:
+                print(delete_item)
+                if delete_item.element_info.control_type == "Button" and delete_item.element_info.name == "닫기":
+                    delete_item.click()
+                    time.sleep(1)
+            
             procs = findwindows.find_elements()
-            # print(procs)
             for sub_procs in procs:
                 if sub_procs.automation_id=="RadMessageBox":
+                    time.sleep(1)
                     for sub_button in sub_procs.children():
                         if sub_button.automation_id == "radButton1":
                             sub_button = HwndWrapper(sub_button)
                             sub_button.click()
-            
-            # sub_check_popup = motion_window.child_window(
-            #     class_name="WindowsForms10.Window.8.app.0.33ec00f_r8_ad1", control_type="Window")           
-            # sub_window = sub_check_popup.children()
-            # sub_list = []
-            # for sub_group in sub_window:
-            #     if sub_group.element_info.control_type == "Window":
-            #         sub_list.append(sub_group)
-            #         print(sub_list)
-                    
-            #         notice_list.append(window_group)
-            # notice_view = notice_list[0].children()
-                        
-            # notice_list = motion_web_window.child_window(
-            #     auto_id="notice-list", control_type="List")
-            
-            
-
-            # for list_item in notice_list.children():
-            #     for item in list_item.children():
-            #         if item.element_info.control_type == "Text" and item.element_info.name == DashBoard.content_random:
-            #             for item in list_item.children():
-            #                 print(item)
-            #                 if item.element_info.control_type == "Button" and item.element_info.name == "닫기":
-            #                     item.click()                                               
-            #                     rad = motion_app.window(auto_id="RadMessageBox")
-            #                     radBtn = rad.child_window(
-            #                     auto_id="radButton1", control_type="Button")
-            #                     radBtn.click()
-            #                     print("공지사항 삭제 성공")
-            #                     break
-            time.sleep(1)                    
+                            time.sleep(1)
+                            break
+            time.sleep(1)
         except Exception as err:
             print("공지사항 삭제 실패", err)
 
@@ -457,16 +439,17 @@ class DashBoard():
             btn_title (string): 예약하기 / 접수하기 텍스트 입력
         """
         DashBoard.search_user(motion_window, chart_number)
-        motion_web_window = motion_window.child_window(
-            class_name="Chrome_RenderWidgetHostHWND", control_type="Document")
-        parent_child = motion_web_window.children()
-        document_list = []
-        for child in parent_child:
-            if child.element_info.control_type == "Document":
-                document_list.append(child)
+        # motion_web_window = motion_window.child_window(
+        #     class_name="Chrome_RenderWidgetHostHWND", control_type="Document")
+        # parent_child = motion_web_window.children()
+        # document_list = []
+        # for child in parent_child:
+        #     if child.element_info.control_type == "Document":
+        #         document_list.append(child)
 
-        document_new_list = document_list[0]
-        child_list = document_new_list.children()
+        # document_new_list = document_list[0]
+        # child_list = document_new_list.children()
+        child_list = DashBoard.return_list(motion_window, 0)
 
         for wrapper in child_list:
             if wrapper.element_info.control_type == "List":
@@ -486,15 +469,16 @@ class DashBoard():
         try:
             print("예약 시작")
             time.sleep(1)
-            motion_web_window = dto.motion_window.child_window(
-                class_name="Chrome_RenderWidgetHostHWND", control_type="Document")
-            parent_child = motion_web_window.children()
-            document_list = []
-            for child in parent_child:
-                if child.element_info.control_type == "Document":
-                    document_list.append(child)
-            document_new_list = document_list[2]
-            child_list = document_new_list.children()
+            child_list= DashBoard.return_list(dto.motion_window, 1)
+            # motion_web_window = dto.motion_window.child_window(
+            #     class_name="Chrome_RenderWidgetHostHWND", control_type="Document")
+            # parent_child = motion_web_window.children()
+            # document_list = []
+            # for child in parent_child:
+            #     if child.element_info.control_type == "Document":
+            #         document_list.append(child)
+            # document_new_list = document_list[2]
+            # child_list = document_new_list.children()
             combo = []
             memo_list = []
             btn_list = []
@@ -626,18 +610,20 @@ class DashBoard():
             index_number = 예약리스트 2 / 접수리스트 3
         """
         try:
-            motion_web_window = motion_window.child_window(
-                class_name="Chrome_RenderWidgetHostHWND", control_type="Document")
-            motion_web_list = motion_web_window.children()
-            chart_item = None
-            doc_list = []
-            for web_item in motion_web_list:
-                if web_item.element_info.control_type == "Document":
-                    doc_list.append(web_item)
+            # motion_web_window = motion_window.child_window(
+            #     class_name="Chrome_RenderWidgetHostHWND", control_type="Document")
+            # motion_web_list = motion_web_window.children()
+            # chart_item = None
+            # doc_list = []
+            # for web_item in motion_web_list:
+            #     if web_item.element_info.control_type == "Document":
+            #         doc_list.append(web_item)
 
-            doc_item = doc_list[index_number]
+            # doc_item = doc_list[index_number]
 
-            doc_child = doc_item.children()
+            # doc_child = doc_item.children()
+            print(index_number)
+            doc_child = DashBoard.return_list(motion_window, index_number)
             for items in doc_child:
                 if items.element_info.control_type == "List":
                     for item in items.children():

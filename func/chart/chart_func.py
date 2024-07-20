@@ -32,18 +32,18 @@ class ChartFunc():
     coordinator_user = ["류미희", "오혜선"]
 
     def chart_starter(start_sub_process_event, sub_process_done_event):
-        # ChartFunc.side_memo_save(0)
-        # ChartFunc.memo_update()
-        # ChartFunc.memo_delete()
+        # ChartFunc.side_memo_save()
+        # ChartFunc.side_memo_update()
+        # ChartFunc.side_memo_delete()
 
-        # ChartFunc.call_memo_save(2)
+        # ChartFunc.call_memo_save()
         # ChartFunc.call_memo_update()
         # ChartFunc.call_memo_delete()
         # ChartFunc.past_resr_veiw(start_sub_process_event)
         # ChartFunc.rsrv_cancle(start_sub_process_event)
-        ChartFunc.cons_create()
+        ChartFunc.receipt_save()
 
-    def window_resize(motion_app):
+    def window_resize():
         return
 
     def find_window():
@@ -111,6 +111,7 @@ class ChartFunc():
             for side_memo_list in side_chart_window.children():
                 for item_list in side_memo_list.children():
                     if item_list.element_info.control_type == "Button" and item_list.element_info.name == "저장":
+                        print("테스트")
                         ChartFunc.memo_save_btn = item_list
                     if item_list.element_info.control_type == "Edit" and item_list.element_info.name == "메모 입력":
                         ChartFunc.memo_save_edit = item_list
@@ -119,13 +120,14 @@ class ChartFunc():
                     if item_list.element_info.control_type == "Text" and item_list.element_info.name != "삭제보기" and not ChartFunc.current_year in item_list.element_info.name:
                         ChartFunc.memo_content_list.append(item_list)
 
-    def memo_save(index_number, memo_value):
+    def memo_save(index_number, link_index, memo_value):
         try:
             print(f"{memo_value} 저장 시작")
             ChartFunc.find_field(index_number)
             if ChartFunc.memo_save_btn is not None and ChartFunc.memo_save_edit is not None:
-                ChartFunc.find_link()
-                memo_link = ChartFunc.memo_link_list[index_number]
+
+                ChartFunc.find_link(index_number)
+                memo_link = ChartFunc.memo_link_list[link_index]
 
                 memo_link.click_input()
                 texts = ["테스트1", "테스트2", "테스트3", "테스트4", "테스트5",
@@ -210,7 +212,7 @@ class ChartFunc():
             print(f"메모 삭제 실패 : {e}")
 
     def side_memo_save():
-        ChartFunc.memo_save(0, ChartFunc.side_memo_value)
+        ChartFunc.memo_save(1, 0, ChartFunc.side_memo_value)
         time.sleep(1)
 
     def side_memo_update():
@@ -231,7 +233,7 @@ class ChartFunc():
         ChartFunc.memo_update(ChartFunc.rsrv_memo_value)
 
     def call_memo_save():
-        ChartFunc.memo_save(2, ChartFunc.call_memo_value)
+        ChartFunc.memo_save(1, 2, ChartFunc.call_memo_value)
         time.sleep(1)
 
     def call_memo_update():
@@ -316,7 +318,7 @@ class ChartFunc():
             return
         if depth == index_number:
             ChartFunc.explore_child_list.append(element)
-        print(f"{depth} level = {element}")
+        # print(f"{depth} level = {element}")
         for child in element.children():
             ChartFunc.explore_children(
                 child, depth + 1, max_depth, index_number=index_number)
@@ -330,45 +332,32 @@ class ChartFunc():
     def random_value(array):
         return random.choice(array)
 
-    def rsrv_tab_view():
-        ChartFunc.view_tab(761, 221)
+    def tab_view(tab_title):
+        if tab_title == "예약":
+            ChartFunc.view_tab(761, 221)
+        elif tab_title == "상담":
+            ChartFunc.view_tab(852, 221)
+        elif tab_title == "진료":
+            ChartFunc.view_tab(937, 221)
+        elif tab_title == "펜차트":
+            ChartFunc.view_tab(1027, 221)
+        elif tab_title == "진료사진":
+            ChartFunc.view_tab(1117, 221)
+        elif tab_title == "동의서":
+            ChartFunc.view_tab(1207, 221)
+        elif tab_title == "수납":
+            ChartFunc.view_tab(1287, 221)
 
-    def cons_tab_view():
-        ChartFunc.view_tab(852, 221)
-
-    def receipt_tab_view():
-        ChartFunc.view_tab(937, 221)
-
-    def panchart_tab_view():
-        ChartFunc.view_tab(1027, 221)
-
-    def receipt_image_tab_view():
-        ChartFunc.view_tab(1117, 221)
-
-    def agreement_tab_view():
-        ChartFunc.view_tab(1207, 221)
-
-    def acceptance_tab_view():
-        ChartFunc.view_tab(1287, 221)
-
-    def rsvr_update(start_sub_process_event):
+    def rsvr_update():
         ChartFunc.rsrv_tab_view()
-        ChartFunc.explore_children(resr_window, depth=0, max_depth=4)
         resr_window = ChartFunc.return_window(auto_id="예약")
 
         ChartFunc.explore_children(
             resr_window, depth=0, max_depth=5, index_number=4)
-        fr_cilhd_list = ChartFunc.explore_child_list[0].children()
-        sec_child_list = ChartFunc.explore_child_list[1].children()
         list_items = ChartFunc.explore_child_list[2].children()
 
         change_btn = None
 
-        _btn = None
-        content_reset_btn = None
-        rsrv_item = None
-        rsrv_date = None
-        rsrv_status = None
         rsrv_tiem_table = None
         rdrddiag_fld_cd_edit = None
         cmb_rsrv_mopr_tp_cd_edit = None
@@ -394,8 +383,6 @@ class ChartFunc():
                 rsrv_tiem_table = item
             if item.element_info.name == "예약 변경" and item.element_info.control_type == "Button":
                 change_btn = item
-            if item.element_info.name == "신규 예약" and item.element_info.control_type == "Button":
-                new_resr_btn = item
             if item.element_info.control_type == "Edit":
                 edit_list.append(item)
             if item.element_info.name == "RdrdDIAG_FLD_CD" and item.element_info.control_type == "ComboBox":
@@ -422,10 +409,12 @@ class ChartFunc():
         if ChartFunc.explore_child_list:
             while True:
                 random_time_table = random.choice(ChartFunc.explore_child_list)
-                print(random_time_table)
+                (random_time_table)
                 if compare_time > random_time_table.element_info.name:
                     continue
-                if random_time_table.element_info.name == "20:00" or random_time_table.element_info.name == "20:15" or random_time_table.element_info.name == "20:30" or random_time_table.element_info.name == "20:45" or random_time_table.element_info.name == "21:00" or random_time_table.element_info.name == "21:15" or random_time_table.element_info.name == "21:30":
+                # if random_time_table.element_info.name == "20:00" or random_time_table.element_info.name == "20:15" or random_time_table.element_info.name == "20:30" or random_time_table.element_info.name == "20:45" or random_time_table.element_info.name == "21:00" or random_time_table.element_info.name == "21:15" or random_time_table.element_info.name == "21:30":
+                print(random_time_table.is_visible())
+                if random_time_table.is_visible():
                     continue
                 else:
                     random_time_table.click_input()
@@ -447,7 +436,6 @@ class ChartFunc():
             fr_edit.set_text("전달메모 테스트")
             sec_edit.set_text("예약메모 테스트")
             change_btn.click()
-            start_sub_process_event.set()
         else:
             print("메모 입력 불가")
 
@@ -478,8 +466,8 @@ class ChartFunc():
         for item in list_items:
             if item.element_info.name == "예약 취소" and item.element_info.control_type == "Button":
                 cancle_btn = item
+        start_sub_process_event.set()
         cancle_btn.click()
-        print("테스트")
         # cancle_window = ChartFunc.return_window(auto_id="PopReservationCancel")
 
         # for list in cancle_window.children():
@@ -489,5 +477,78 @@ class ChartFunc():
         return
 
     def receipt_save():
-        receipt_window = ChartFunc.return_window(auto_id="진료")
-        return
+        # ChartFunc.receipt_tab_view()
+
+        # try:
+        cons_window = ChartFunc.return_window(auto_id="진료")
+        cons_edit_list = []
+        product_edit = None
+
+        ChartFunc.explore_children(
+            cons_window, depth=0, max_depth=6, index_number=6)
+
+        fr_list = ChartFunc.explore_child_list[0]
+        sec_list = ChartFunc.explore_child_list[1]
+        th_list = ChartFunc.explore_child_list[2]
+        four_list = ChartFunc.explore_child_list[3]
+        five_list = ChartFunc.explore_child_list[4]
+
+        print_btn = None
+        save_btn = None
+        reim_str = None
+        non_reim_str = None
+        acceptance_str = None
+        prescription_edit = None
+        corporal_edit = None
+        edit_list = None
+
+        # print(fr_list)
+        # for fr_item in fr_list.children():
+        #     print(fr_item)
+        for sec_item in sec_list.children():
+            for items in sec_item.children():
+                if items.element_info.name == "처방전 출력" and items.element_info.control_type == "Button":
+                    print_btn = items
+                if items.element_info.name == "저장" and items.element_info.control_type == "Button":
+                    save_btn = items
+                if items.element_info.automation_id == "lblTotPayAmt":
+                    acceptance_str = items
+                if items.element_info.automation_id == "lblNPayAmt":
+                    non_reim_str = items
+                if items.element_info.automation_id == "lblPayAmt":
+                    reim_str = items
+
+        # 처방 입력영역
+        for th_item in th_list.children():
+            for items in th_item.children():
+                # print(items)
+                prescription_edit = items
+        # # 세트처방 라인
+        # for four_item in four_list.children():
+        #     for items in four_item.children():
+        #         for item in items.children():
+        #             print(item)
+        random_user = random.choice(ChartFunc.doctor_user)
+        for five_item in five_list.children():
+            for items in five_item.children():
+                if items.element_info.control_type == "Pane":
+                    for item in items.children():
+                        if item.element_info.control_type == "Edit" and item.element_info.automation_id == "pnlDiagMemoDetail" or item.element_info.automation_id == "pnlSymtPrgsDetail":
+                            return
+                            # edit_list.append(item)
+                if items.element_info.control_type == "Edit" and items.element_info.automation_id == "txtSrchSick":
+                    corporal_edit = items
+                if items.element_info.control_type == "ComboBox" and items.element_info.automation_id == "radDropDownListINSU":
+                    items.set_focus()
+                # if items.element_info.control_type == "ComboBox" and item s.element_info.automation_id == "cmbChrgDrId":
+                #     item_child = items.children()
+                #     item_child[0].set_text("test2")
+                if items.element_info.control_type == "ComboBox" and items.element_info.automation_id == "cmbDgrsltTpCd":
+                    item_child = items.children()
+                    item_child[0].set_text(random_user)
+        if corporal_edit is not None:
+            corporal_edit.set_text("상병입력란 입력 테스트")
+        # except findwindows.ElementNotFoundError as e:
+        #   print(e)
+        #     ChartFunc.tab_view("진료")
+        #     ChartFunc.receipt_save()
