@@ -108,7 +108,7 @@ class ProcessFunc():
         elif "이름을 입력하세요" in item_tle:
             item_btn = HwndWrapper(item_btn)
             item_btn.click()
-        elif "삭제되었습니다." in item_tle or "저장되었습니다" in item_tle or "예약이완료되었습니다!" in item_tle or "접수완료되었습니다." in item_tle or "완료되었습니다." in item_tle or "예약되었습니다." in item_tle:
+        elif "삭제되었습니다." in item_tle or "저장되었습니다" in item_tle or "예약이완료되었습니다!" in item_tle or "접수완료되었습니다." in item_tle or "완료되었습니다." in item_tle or "예약되었습니다." in item_tle or "DUR완료" in item_tle:
             item_btn = HwndWrapper(item_btn)
             item_btn.click()
             start_sub_process_event.clear()
@@ -138,6 +138,9 @@ class ProcessFunc():
             sub_process_done_event.wait()
         else:
             raise Exception('팝업 확인필요')
+
+    def chart_sub_process(start_sub_process_event, sub_process_done_event):
+        print("테스트")
 
     def notice_popup_close(motion_app):
         procs = findwindows.find_elements()
