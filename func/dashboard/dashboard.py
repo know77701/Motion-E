@@ -15,11 +15,11 @@ class DashBoard():
     def __init__(self):
         self.RETRIES = 0
         self.MAX_RETRY = 3
-        self.notice_content = ["테스트","TEST","CHECK NOTICE","안드로이드","아이오에스"]
-        self.content_random = random.choice(self.notice_content)
+
         self.chart_view_result = False
         self.chart_fucn = ChartFunc()
         self.motion_starter = MotionStarter()
+        self.notice_content = ["테스트","TEST","CHECK NOTICE","안드로이드","아이오에스"]
 
     def dashboard_starter(self,dto:DashboardDto):
         """
@@ -38,15 +38,15 @@ class DashBoard():
         
         # 화면 초기화
         # self.dashboard_reset(dto.motion_window, dto.motion_app)
-        dto.chart_number = "0000002351"
-        self.mouse_atcion(dto.motion_window,1, dto.chart_number)
+        # dto.chart_number = "0000002351"
+        # self.mouse_atcion(dto.motion_window,1, dto.chart_number)
 
         
         # # 공지사항 등록/비교/삭제
-        # self.notice_create(dto.motion_window)
-        # self.notice_delete(dto.motion_window)
+        self.notice_create(dto.motion_window)
+        self.notice_delete(dto.motion_window)
 
-        # # 신환 등록
+        # # # 신환 등록
         # self.user_save(dto)
 
         # # 등록 환자 예약/비교
@@ -113,73 +113,69 @@ class DashBoard():
         print("리셋 함수 종료")
         time.sleep(0.5)
 
+    def select_notice(self, compare_notice):
+        return_value = self.notice_get_list()
+        return
+
     def notice_create(self,motion_window):
         try:
             print("공지사항 등록 시작")
-            motion_web_window = motion_window.child_window(
-                class_name="Chrome_RenderWidgetHostHWND", control_type="Document")
-            web_window = motion_web_window.children()
-            notice_list = []
-            for window_group in web_window:
-                if window_group.element_info.control_type == "Document":
-                    notice_list.append(window_group)
-            notice_view = notice_list[0].children()
+            content_random = random.choice(self.notice_content)
+            notice_list = self.notice_get_list(motion_window)
             
-            for notice_group in notice_view:
+            for notice_group in notice_list:
                 if notice_group.element_info.control_type == "Edit":
-                    notice_group.set_text(self.content_random)
-                    time.sleep(1)
                     notice_group.set_focus()
-                    keyboard.send_keys('{ENTER}')
+                    notice_group.set_text(content_random)
+                    time.sleep(1)
                     break
-            time.sleep(1)
+            
+            keyboard.send_keys('{ENTER}')
+            keyboard.send_keys('{ENTER}')
+            print("공지사항 등록 종료")
         except Exception as err:
             keyboard.send_keys('{F5}')
             print("공지등록 실패", err)
 
+    def notice_get_list(self, motion_window):
+        motion_web_window = motion_window.child_window(
+            class_name="Chrome_RenderWidgetHostHWND", control_type="Document")
+        web_window = motion_web_window.children()
+        notice_list = []
+        for window_group in web_window:
+            print(window_group.element_info.control_type)
+            print(window_group.element_info.name)
+            if window_group.element_info.control_type == "Document":
+                notice_list.append(window_group)
+        notice_view = notice_list[0].children()
+        return notice_view
+
     def notice_delete(self,motion_window):
         try:
-            print("공시사항 삭제 시작")
-            motion_web_window = motion_window.child_window(
-                class_name="Chrome_RenderWidgetHostHWND", control_type="Document")
-            web_window = motion_web_window.children()
-            notice_list = []
-            for window_group in web_window:
-                if window_group.element_info.control_type == "Document":
-                    notice_list.append(window_group)
-            notice_view = notice_list[0].children()
-            
+            print("공지사항 삭제 시작")
             random_item = []
-            for window_item in notice_view:
+            view_list = self.notice_get_list(motion_window);
+            for window_item in view_list:
                 if window_item.element_info.control_type == "List":
-                    notice_list.append(window_item)
                     for list_item in window_item.children():
-                        for select_item in list_item.children():
-                            if select_item.element_info.control_type == "Text" and select_item.element_info.name == self.content_random:
-                                random_item.append(list_item.children())
+                        random_item.append(list_item.children())
                                 
             random_select = random.choice(random_item)
+            
             for delete_item in random_select:
                 if delete_item.element_info.control_type == "Button" and delete_item.element_info.name == "닫기":
                     delete_item.click()
-                    time.sleep(1)
-            
-            procs = findwindows.find_elements()
-            for sub_procs in procs:
-                if sub_procs.automation_id=="RadMessageBox":
-                    time.sleep(1)
-                    for sub_button in sub_procs.children():
-                        if sub_button.automation_id == "radButton1":
-                            sub_button = HwndWrapper(sub_button)
-                            sub_button.click()
-                            time.sleep(1)
-                            break
+                    time.sleep(0.5)
+                    
+            for element_list in view_list:
+                print(element_list.element_info.name)
+                print(element_list.element_info.control_type)
+            print("공지사항 삭제 종료")
             time.sleep(1)
         except Exception as err:
             print("공지사항 삭제 실패", err)
 
     def search_user(self,motion_window, search_name):
-        
         motion_web_window = motion_window.child_window(
             class_name="Chrome_RenderWidgetHostHWND", control_type="Document")
         child_list = motion_web_window.children()
