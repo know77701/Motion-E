@@ -113,9 +113,21 @@ class DashBoard():
         print("리셋 함수 종료")
         time.sleep(0.5)
 
-    def select_notice(self, compare_notice):
-        return_value = self.notice_get_list()
-        return
+    def select_notice(self, compare_notice, motion_window):
+        element_list = self.notice_get_list(motion_window)
+        for element in element_list:
+            print(f"name = {element.element_info.name} / {element.element_info.control_type}")
+        
+    def notice_get_list(self, motion_window):
+        motion_web_window = motion_window.child_window(
+            class_name="Chrome_RenderWidgetHostHWND", control_type="Document")
+        web_window = motion_web_window.children()
+        notice_list = []
+        for window_group in web_window:
+            if window_group.element_info.control_type == "Document":
+                notice_list.append(window_group)
+        notice_view = notice_list[0].children()
+        return notice_view
 
     def notice_create(self,motion_window):
         try:
@@ -127,28 +139,15 @@ class DashBoard():
                 if notice_group.element_info.control_type == "Edit":
                     notice_group.set_focus()
                     notice_group.set_text(content_random)
-                    time.sleep(1)
+                    time.sleep(2)
                     break
             
-            keyboard.send_keys('{ENTER}')
             keyboard.send_keys('{ENTER}')
             print("공지사항 등록 종료")
         except Exception as err:
             keyboard.send_keys('{F5}')
             print("공지등록 실패", err)
 
-    def notice_get_list(self, motion_window):
-        motion_web_window = motion_window.child_window(
-            class_name="Chrome_RenderWidgetHostHWND", control_type="Document")
-        web_window = motion_web_window.children()
-        notice_list = []
-        for window_group in web_window:
-            print(window_group.element_info.control_type)
-            print(window_group.element_info.name)
-            if window_group.element_info.control_type == "Document":
-                notice_list.append(window_group)
-        notice_view = notice_list[0].children()
-        return notice_view
 
     def notice_delete(self,motion_window):
         try:
@@ -167,9 +166,11 @@ class DashBoard():
                     delete_item.click()
                     time.sleep(0.5)
                     
-            for element_list in view_list:
-                print(element_list.element_info.name)
-                print(element_list.element_info.control_type)
+            delete_popup_list = self.notice_get_list(motion_window);
+            print("list range")
+            for el in delete_popup_list:
+                
+                print(f"name = {el.element_info.name} / {el.element_info.control_type}")
             print("공지사항 삭제 종료")
             time.sleep(1)
         except Exception as err:
