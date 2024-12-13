@@ -44,7 +44,7 @@ class DashBoard():
         
         # # 공지사항 등록/비교/삭제
         self.notice_create(dto.motion_window)
-        self.notice_delete(dto.motion_window)
+        # self.notice_delete(dto.motion_window)
 
         # # # 신환 등록
         # self.user_save(dto)
@@ -115,19 +115,33 @@ class DashBoard():
 
     def select_notice(self, compare_notice, motion_window):
         element_list = self.notice_get_list(motion_window)
+        return_value = False
         for element in element_list:
-            print(f"name = {element.element_info.name} / {element.element_info.control_type}")
+            if element.element_info.control_type == "List":
+                for list_item in element.children():
+                    for item in list_item.children():
+                        if compare_notice == item.element_info.name:
+                            print(f"name = {item.element_info.name} / {item.element_info.control_type} 등록 확인")
+                            return_value = True       
+                            break;
+        return return_value
         
-    def notice_get_list(self, motion_window):
+    def notice_get_list(self, motion_window, element=None):
         motion_web_window = motion_window.child_window(
             class_name="Chrome_RenderWidgetHostHWND", control_type="Document")
         web_window = motion_web_window.children()
         notice_list = []
-        for window_group in web_window:
-            if window_group.element_info.control_type == "Document":
+        if element is None :
+            for window_group in web_window:
+                if window_group.element_info.control_type == "Document":
+                    notice_list.append(window_group)
+            notice_view = notice_list[0].children()
+            return notice_view
+        else:
+            for window_group in web_window:
                 notice_list.append(window_group)
-        notice_view = notice_list[0].children()
-        return notice_view
+            return notice_list
+            
 
     def notice_create(self,motion_window):
         try:
@@ -143,10 +157,13 @@ class DashBoard():
                     break
             
             keyboard.send_keys('{ENTER}')
+            
+            return_value = self.select_notice("test", motion_window)
+            assert return_value, "공지사항 등록 실패"
             print("공지사항 등록 종료")
         except Exception as err:
             keyboard.send_keys('{F5}')
-            print("공지등록 실패", err)
+            print(err)
 
 
     def notice_delete(self,motion_window):
@@ -165,12 +182,21 @@ class DashBoard():
                 if delete_item.element_info.control_type == "Button" and delete_item.element_info.name == "닫기":
                     delete_item.click()
                     time.sleep(0.5)
-                    
-            delete_popup_list = self.notice_get_list(motion_window);
-            print("list range")
-            for el in delete_popup_list:
-                
-                print(f"name = {el.element_info.name} / {el.element_info.control_type}")
+            
+            delete_element_list = self.notice_get_list(motion_window, "Group")
+            
+            for element_list in delete_element_list:
+                if element_list.element_info.control_type == "Custom":
+                    custom_list = element_list.children()
+                    for list_item in custom_list:
+                        if list_item.element_info.control_type == "Group":
+                            for el in list_item.children():
+                                if el.element_info.control_type == "Button" and el.element_info.name == "예":
+                                    el.click()
+                            
+                            
+            
+
             print("공지사항 삭제 종료")
             time.sleep(1)
         except Exception as err:
