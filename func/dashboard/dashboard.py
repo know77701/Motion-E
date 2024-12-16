@@ -13,7 +13,7 @@ class DashBoard():
     Motion E 차트 대시보드 동작
     """
     def __init__(self):
-        self.RETRIES = 0
+        self.RETRIES = 0    
         self.MAX_RETRY = 3
 
         self.chart_view_result = False
@@ -37,17 +37,20 @@ class DashBoard():
         
         
         # 화면 초기화
-        # self.dashboard_reset(dto.motion_window, dto.motion_app)
+        self.dashboard_reset(dto.motion_window, dto.motion_app)
         # dto.chart_number = "0000002351"
+        
+        # 고객삭제동작 재확인필요
         # self.mouse_atcion(dto.motion_window,1, dto.chart_number)
 
         
-        # # 공지사항 등록/비교/삭제
-        self.notice_create(dto.motion_window)
-        # self.notice_delete(dto.motion_window)
+        # 공지사항 등록/비교/삭제
+        # return_value = self.notice_create(dto.motion_window)
+        # if return_value != None:
+        #     self.notice_delete(dto.motion_window, return_value)
 
-        # # # 신환 등록
-        # self.user_save(dto)
+        # 신환 등록
+        self.user_save(dto)
 
         # # 등록 환자 예약/비교
         # dto.btn_title = "예약하기"
@@ -121,7 +124,6 @@ class DashBoard():
                 for list_item in element.children():
                     for item in list_item.children():
                         if compare_notice == item.element_info.name:
-                            print(f"name = {item.element_info.name} / {item.element_info.control_type} 등록 확인")
                             return_value = True       
                             break;
         return return_value
@@ -140,8 +142,7 @@ class DashBoard():
         else:
             for window_group in web_window:
                 notice_list.append(window_group)
-            return notice_list
-            
+            return notice_list 
 
     def notice_create(self,motion_window):
         try:
@@ -153,20 +154,25 @@ class DashBoard():
                 if notice_group.element_info.control_type == "Edit":
                     notice_group.set_focus()
                     notice_group.set_text(content_random)
-                    time.sleep(2)
+                    time.sleep(0.5)
+                    notice_group.set_focus()
+                    keyboard.send_keys('{ENTER}')
                     break
             
-            keyboard.send_keys('{ENTER}')
+            return_value = self.select_notice(content_random, motion_window)
             
-            return_value = self.select_notice("test", motion_window)
             assert return_value, "공지사항 등록 실패"
-            print("공지사항 등록 종료")
+            
+            if return_value:
+                print("공지사항 등록 종료")
+                return content_random
+            else:
+                return None
         except Exception as err:
             keyboard.send_keys('{F5}')
             print(err)
 
-
-    def notice_delete(self,motion_window):
+    def notice_delete(self,motion_window, return_value):
         try:
             print("공지사항 삭제 시작")
             random_item = []
@@ -192,15 +198,15 @@ class DashBoard():
                         if list_item.element_info.control_type == "Group":
                             for el in list_item.children():
                                 if el.element_info.control_type == "Button" and el.element_info.name == "예":
-                                    el.click()
-                            
-                            
-            
+                                    el.click()            
 
+            return_value = self.select_notice(return_value, motion_window)
+            assert return_value == False, "공지사항 삭제 실패"
             print("공지사항 삭제 종료")
-            time.sleep(1)
+            time.sleep(0.5)
         except Exception as err:
-            print("공지사항 삭제 실패", err)
+            keyboard.send_keys('{F5}')
+            print(err)
 
     def search_user(self,motion_window, search_name):
         motion_web_window = motion_window.child_window(
@@ -243,17 +249,16 @@ class DashBoard():
             chart_number = None
             for item in window_list:
                 if item.element_info.control_type == "Window" and item.element_info.name == "고객등록":
-                    for child in item.children():
-                        if child.element_info.control_type == "Pane":
-                            for child_list in child.children():
-                                for value in child_list.children():
-                                    if value.element_info.control_type == "Edit":
-                                        edit_list.append(value)
-                                        if value.element_info.automation_id == "txtChart_No":
-                                            chart_number = value.element_info.name
-                                    if value.element_info.control_type == "Button" and value.element_info.name == dto.btn_title:
-                                        save_btn = value
-            time.sleep(3)
+                    panes = [child for child in item.children() if child.element_info.control_type == "Pane"]
+                    for pane in panes:
+                        for child in pane.children():
+                            if child.element_info.control_type == "Edit":
+                                edit_list.append(child)
+                                if child.element_info.automation_id == "txtChart_No":
+                                    chart_number = child.element_info.name
+                            elif child.element_info.control_type == "Button" and child.element_info.name == dto.btn_title:
+                                save_btn = child
+            time.sleep(1.5)
             dto.chart_number = chart_number
             while self.RETRIES <= self.MAX_RETRY:
                 if edit_list is not []:
@@ -617,7 +622,6 @@ class DashBoard():
                         rect = child.rectangle()
                         center = rect.mid_point()
                         mouse.right_click(coords=(center.x, center.y))
-                        
     
         card_window = self.return_list(motion_window,index_number)
                             
