@@ -12,3 +12,4 @@ https://github.com/yinkaisheng/Python-UIAutomation-for-Windows/tree/master/inspe
 
 ### 필요 모듈 설치
 pip install pywinauto pyautogui pillow pyscreeze
+
