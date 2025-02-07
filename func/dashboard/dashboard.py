@@ -1,11 +1,13 @@
-from pywinauto import keyboard, findwindows, mouse
-from func.start.motion_starter import *
-from pywinauto.controls.hwndwrapper import HwndWrapper
-import time
 import random
-from func.publicFunc.public_func import *
+import time
+
+from pywinauto import findwindows, keyboard, mouse
+from pywinauto.controls.hwndwrapper import HwndWrapper
+
+from func.chart.ChartFunc import *
 from func.dto.dto import DashboardDto
-from func.chart.chart_func import *
+from func.publicFunc.public_func import *
+from func.start.motion_starter import *
 
 
 class DashBoard():
@@ -50,7 +52,7 @@ class DashBoard():
         #     self.notice_delete(dto.motion_window, return_value)
 
         # 신환 등록
-        self.user_save(dto)
+        # self.user_save(dto)
 
         # # 등록 환자 예약/비교
         # dto.btn_title = "예약하기"
@@ -91,7 +93,7 @@ class DashBoard():
                                 title_bar.click()
                             if title_bar.element_info.name == "최대화" and title_bar.element_info.control_type == "Button":
                                 title_bar.click()
-                                break
+                break
         if self.motion_starter.version_search('접수'):
             receipt_window = motion_app.window(
                 title="접수", control_type="Window", auto_id="PopAcpt")
@@ -112,6 +114,7 @@ class DashBoard():
                     if item.element_info.name == "최대화" and item.element_info.control_type == "Button":
                         item.click()
                         break
+        time.sleep(0.5)
         keyboard.send_keys("{F5}")
         print("리셋 함수 종료")
         time.sleep(0.5)
@@ -252,13 +255,17 @@ class DashBoard():
                     panes = [child for child in item.children() if child.element_info.control_type == "Pane"]
                     for pane in panes:
                         for child in pane.children():
+                            print(child)
                             if child.element_info.control_type == "Edit":
+                                print(child.element_info.name)
+                                print(child.element_info.automation_id)
                                 edit_list.append(child)
                                 if child.element_info.automation_id == "txtChart_No":
                                     chart_number = child.element_info.name
                             elif child.element_info.control_type == "Button" and child.element_info.name == dto.btn_title:
                                 save_btn = child
             time.sleep(1.5)
+            print(edit_list)
             dto.chart_number = chart_number
             while self.RETRIES <= self.MAX_RETRY:
                 if edit_list is not []:
