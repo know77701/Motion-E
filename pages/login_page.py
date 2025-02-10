@@ -2,6 +2,7 @@ from pywinauto import findwindows, keyboard, mouse
 
 import config
 from locators.login_locators import LoginLocators
+from pages.base_page import *
 from utils.app_screen_shot import window_screen_shot
 
 
@@ -11,41 +12,33 @@ class LoginPage:
     """
     def __init__(self, app):
         self.login_window = app.window(title=LoginLocators.LOGIN_FORM_TITLE)
-        
-    def login_info(self):
+        self.base_page = BasePage()
+    
+    """병원정보 영역 보이기"""
+    def hospital_info_view(self):
         keyboard.send_keys("^h")
-        yakiho_text = self.login_window.child_window(auto_id=LoginLocators.YKIHO_TEXT_ID)
-
-        if not yakiho_text.exists():
-            raise Exception("야키호 텍스트 박스를 찾을 수 없습니다.")
-
-        yakiho_text = yakiho_text.wrapper_object()  # 컨트롤 객체 변환
-
-        try:
-            # 텍스트 가져오기
-            current_text = yakiho_text.window_text()
-            print(f"현재 입력된 값: {current_text}")
-        except AttributeError:
-            # get_value()가 없으면 texts() 사용
-            current_text = yakiho_text.texts()[0] if yakiho_text.texts() else ""
-            print(f"현재 입력된 값: {current_text}")
-
-        return current_text
-
-
-
+        yakiho_window = self.login_window.child_window(auto_id=LoginLocators.YAKIHO_TEXT_ID)
+        if not yakiho_window.exists():
+            raise Exception("요양기관번호 입력영역을 찾을 수 없습니다.")
     
-    def setting_yakiho(self):
-        yakiho_text = self.login_window.child_window(auto_id=LoginLocators.YKIHO_TEXT_ID)
+    """요양기관번호 입력"""
+    def hospital_yakiho_setting(self):
+        edit = self.base_page.find_element(auto_id=LoginLocators.YAKIHO_TEXT_ID).wrapper_object().children()[0]
+        self.base_page.input_text(edit,"22222222")
 
-        if yakiho_text == "22222222":
-            print("개발차트 확인")
-            return
-        else:
-            yakiho_text.set_focus()            
-            yakiho_text.set_text("22222222")          
+
+    """유저 아이디 입력"""
+    def user_id_setting(self):
+        id_edit = self.base_page.find_element(auto_id=LoginLocators.ID_EDIT_ID).wrapper_object().children()[0]
+        self.base_page.input_text(id_edit,"트라이업")
     
-    def login_click(self):
+    """유저 비밀번호 입력"""
+    def user_pw_setting(self):
+        pw_edit = self.base_page.find_element(auto_id=LoginLocators.PW_EDIT_ID).wrapper_object().children()[0]
+        self.base_page.input_text(pw_edit,"트라이업")
+
+    """로그인 버튼 클릭"""
+    def btn_click(self):
         try:
             self.login_window.child_window(auto_id=LoginLocators.LOGIN_BUTTON_ID).click()
         except Exception as e:
