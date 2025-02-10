@@ -1,10 +1,11 @@
 from pywinauto import application, findwindows
 from pywinauto.controls.hwndwrapper import HwndWrapper
-from func.dto.dto import DashboardDto
-from func.start.motion_starter import *
+
+from func.chart.ChartFunc import *
 from func.dashboard.dashboard import *
+from func.dto.dto import DashboardDto
 from func.publicFunc.public_func import *
-from func.chart.chart_func import *
+from func.start.motion_starter import *
 
 
 class ProcessFunc():
@@ -31,7 +32,7 @@ class ProcessFunc():
         motion_window = motion_app.window(title=self.motion_starter.version_search(self.motion_value))
 
         dto = DashboardDto(motion_window, motion_app, self.dto_search_name, self.dto_phone_number,
-                           start_sub_process_event, sub_process_done_event, "", "0123456789")
+                           start_sub_process_event, sub_process_done_event, "", "0000002351")
 
         # 서브프로세스 통신용
         dto.start_sub_process_event.set()
@@ -39,7 +40,7 @@ class ProcessFunc():
         # 서브프로세스 대기용
         dto.sub_process_done_event.wait()
 
-        # self.notice_popup_close(motion_app)
+        self.notice_popup_close(motion_app)
         self.dashBoard.dashboard_starter(dto)
 
     def sub_process_func(self, start_sub_process_event, sub_process_done_event):
@@ -157,3 +158,4 @@ class ProcessFunc():
                         if item.element_info.control_type == "Button" and item.element_info.name == "닫기":
                             item.click()
                             break
+                        
