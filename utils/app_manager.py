@@ -11,14 +11,16 @@ from utils.app_screen_shot import window_screen_shot
 class AppManger:
     def __init__(self):
         self.backend = "uia"
+        self.win_32_backend = "win32"
         self.win32_app = application.Application()
-        self.motion_app = application.Application()
+        self.motion_app = application.Application(backend=self.backend)
         
     def version_search(self, search_title):
         """특정 창이 열려있는지 확인"""
         windows = Desktop(backend=self.backend).windows()
         try:
             for window in windows:
+                print(window)
                 if search_title in window.window_text():
                     return window.window_text()
         except Exception as e:
