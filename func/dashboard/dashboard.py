@@ -91,7 +91,6 @@ class DashBoard():
                                 title_bar.click()
                             if title_bar.element_info.name == "최대화" and title_bar.element_info.control_type == "Button":
                                 title_bar.click()
-                                break
         if self.motion_starter.version_search('접수'):
             receipt_window = motion_app.window(
                 title="접수", control_type="Window", auto_id="PopAcpt")
