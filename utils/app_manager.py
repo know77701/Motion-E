@@ -20,7 +20,6 @@ class AppManger:
         windows = Desktop(backend=self.backend).windows()
         try:
             for window in windows:
-                print(window)
                 if search_title in window.window_text():
                     return window.window_text()
         except Exception as e:
@@ -29,19 +28,20 @@ class AppManger:
             
                 
     def login_form_connect(self,win32_app):
-        app = win32_app.connect(path=config.PROCESS_TITLE)
+        app = win32_app.connect(title=config.PROCESS_TITLE)
         app.top_window().set_focus()
         return app
             
     def motion_app_connect(self, motion_app):
-        app = motion_app.connect(path=config.PROCESS_TITLE)
+        version_text = self.version_search(config.MOTION_VERSION_TITLE)
+        app = motion_app.connect(title=version_text)
         app.top_window().set_focus()
         return app
             
     def app_connect(self, retries=0):
         from locators.login_locators import LoginLocators
         try:
-            if self.version_search('모션.ver'):
+            if self.version_search(config.MOTION_VERSION_TITLE):
                 return self.motion_app_connect(self.motion_app)
             elif self.version_search(LoginLocators.LOGIN_FORM_TITLE):
                 return self.login_form_connect(self.win32_app)
