@@ -5,6 +5,7 @@ import time
 from pywinauto import Desktop, application
 
 import config
+from locators.login_locators import LoginLocators
 from utils.app_screen_shot import window_screen_shot
 
 
@@ -15,7 +16,9 @@ class AppManger:
         self.win32_app = application.Application()
         self.motion_app = application.Application(backend=self.backend)
         
+   
     def version_search(self, search_title):
+        
         """특정 창이 열려있는지 확인"""
         windows = Desktop(backend=self.backend).windows()
         try:
@@ -39,7 +42,6 @@ class AppManger:
         return app
             
     def app_connect(self, retries=0):
-        from locators.login_locators import LoginLocators
         try:
             if self.version_search(config.MOTION_VERSION_TITLE):
                 return self.motion_app_connect(self.motion_app)
