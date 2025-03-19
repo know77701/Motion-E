@@ -12,6 +12,9 @@ class TestSidePage:
         self.test_set_notice()
     
     def test_set_notice(self):
-        self.side_page.set_notice("테스트")
+        input_notice = "테스트"
+        # current_time = self.side_page.save_notice(input_notice)
+        # self.side_page.compare_notice(input_notice, current_time)
+        self.side_page.delete_notice(input_notice)
         return
     

@@ -49,8 +49,8 @@ class AppManger:
                 return self.login_form_connect(self.win32_app)
             else:
                 self.win32_app.start(config.APP_PATH)
-                motion_window = self.motion_app_connect(self.motion_app)
                 time.sleep(3)
+                motion_window = self.motion_app_connect(self.motion_app)
                 return motion_window
                 
         except application.ProcessNotFoundError as e:
