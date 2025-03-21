@@ -15,6 +15,7 @@ class SidePage:
         app_title = app.version_search(DashboardLocators.MAIN_FORM_TITLE)
         self.side_window = Desktop(backend="uia").window(title=app_title)
         self.base_page = BasePage(app)
+        
         # self.dashboard_reset();
         # self.side_field = self.base_page.find_element(auto_id=SideFieldLocators.SIDE_GROUP)
         
@@ -228,7 +229,6 @@ class SidePage:
     def search_user(self, username):
         """유저 검색"""
         search_edit = self.side_find_field("search_edit")
-
         search_button = self.side_find_field("search_btn")
         
         if search_edit:
@@ -244,25 +244,40 @@ class SidePage:
         
     def get_child_list(self, object_list):
         list_items = []
-        list_item = object_list[0]
-        for item in list_item.children():
-            list_items.append(item)
+        for list_item in object_list:
+            for items in list_item.children():
+                list_items.append(items)
         return list_items
-    
     
     def get_search_user_list(self):
         search_user_list = self.get_search_field()
-        list_object = self.find_lists(search_user_list)
+        list_object = self.get_child_list(search_user_list)
         return list_object
 
-    def compare_search_user(self, username=None, chart_numbe=None):
+    def compare_list(self, user_list, username=None, chart_number=None):
+        for list_item in user_list:
+            for item in list_item.children():
+                if item.element_info.control_type != "Text":
+                    continue
+
+                name = item.element_info.name
+                if username and name in username:
+                    return list_item
+                if chart_number and name in chart_number:
+                    return list_item
+                if username and chart_number and name in [username, chart_number]:
+                    return list_item
+
+    def compare_search_user(self, username=None, chart_number=None):
         user_list = self.get_search_user_list()
-        if username is not None and chart_numbe is not None:
-            return
-        elif username is not None:
-            return
-        elif chart_numbe is not None:
-            return
+        if username is not None and chart_number is not None:
+            if self.compare_list(user_list, username, chart_number) is []:
+                print("등록된 유저를 찾을 수 없습니다.")
+        else:
+            print(f"환자명 / 차트번호가 입력되지 않았습니다.")
+    def user_reserve(sefl,username=None, chart_nmumber=None):
+        
+        return
     
     def get_save_user_popup(self):
         return

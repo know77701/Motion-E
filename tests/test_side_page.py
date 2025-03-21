@@ -22,7 +22,7 @@ class TestSidePage:
         # self.side_page.update_notice(notice)
         # self.side_page.search_user("소말리")
         # self.side_page.compare_search_user("소말리")
-        self.side_page.get_search_user_list()
+        self.side_page.compare_search_user("소말리","0000002351")
         end_time = time.perf_counter()
         execution_time = end_time - start_time  # 실행 시간 차이
         print(f"Function executed in: {execution_time:.4f} seconds")
