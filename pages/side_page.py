@@ -21,41 +21,70 @@ class SidePage:
     def dashboard_reset(self):
         self.base_page.dashboard_reset(self.side_window)
         return
+    
+    def get_side_field(self):
+        """사이드 필드 객체 가져오기"""
+        return self.side_window.child_window(class_name="Chrome_RenderWidgetHostHWND").wrapper_object()
+
+    def find_text(self, side_list):
+        return [item for item in side_list if item.element_info.control_type =="Text"]
+
+    def find_buttons(self, side_list):
+        """버튼 찾기"""
+        return [item for item in side_list if item.element_info.control_type == "Button"]
+
+    def find_button_by_name(self, side_list, name):
+        """버튼 특정 이름가진 객체 찾기"""
+        return next((item for item in side_list if item.element_info.control_type == "Button" and item.element_info.name == name), None)
+
+    def find_lists(self, side_list):
+        """리스트 객체찾기"""
+        return [item for item in side_list if item.element_info.control_type == "List"]
+
+    def find_edit_by_automation_id(self, side_list, automation_id):
+        """Edit 객체 찾기"""
+        return next((item for item in side_list if item.element_info.control_type == "Edit" and item.element_info.automation_id == automation_id), None)
+
+    def find_documents(self, side_list):
+        """Document 객체 찾기"""
+        return [item for item in side_list if item.element_info.control_type == "Document"]
+
     def side_find_field(self, find_name):
-        side_field = self.side_window.child_window(class_name="Chrome_RenderWidgetHostHWND").wrapper_object()
+        """사이드 영역 객체 찾기"""
+        side_field = self.get_side_field()
         side_list = side_field.children()
         
-        list_boxes = [item for item in side_list if item.element_info.control_type == "List"]
-        button_boxes = [item for item in side_list if item.element_info.control_type == "Button"]
-        today_btn = [item for item in side_list if item.element_info.control_type == "Button"
-                        and item.element_info.name == "오늘"]
-        search_btn = [item for item in side_list if item.element_info.control_type == "Button"
-                        and item.element_info.name == "검색"]
-        Edit_boxes = [item for item in side_list if item.element_info.control_type == "Edit" 
-                        and item.element_info.automation_id == "srch-val"]
-        doc_boxes = [item for item in side_list if item.element_info.control_type == "Document"]
-        reservation_doc_boxes = [item for item in side_list if item.element_info.control_type == "Document"
-                                    and item.element_info.automation_id == "reservation"]
-        if find_name == "bookmark_btn":
-            return button_boxes[0]
-        if find_name == "doctor_filter_list":
-            return list_boxes[0]
-        if find_name == "insurance_filter_list":
-            return list_boxes[1]
+        if find_name in ["bookmark_btn", "search_btn", "today_btn"]:
+            button_boxes = self.find_buttons(side_list)
+            if find_name == "bookmark_btn":
+                return button_boxes[0]
+            if find_name == "search_btn":
+                return self.find_button_by_name(side_list, "검색")
+            if find_name == "today_btn":
+                return self.find_button_by_name(side_list, "오늘")
+        
+        if find_name in ["doctor_filter_list", "insurance_filter_list"]:
+            list_boxes = self.find_lists(side_list)
+            if find_name == "doctor_filter_list":
+                return list_boxes[0]
+            if find_name == "insurance_filter_list":
+                return list_boxes[1]
+        
         if find_name == "search_edit":
-            return Edit_boxes[0]
-        if find_name == "notice_group":
-            return doc_boxes[0]
-        if find_name == "reservation_list":
-            return doc_boxes[1].children()
-        if find_name == "search_btn":
-            return search_btn
-        if find_name == "today_btn":
-            return today_btn
-        if find_name == "reservation_group":
-            return reservation_doc_boxes
+            return self.find_edit_by_automation_id(side_list, "srch-val")
+        
+        if find_name in ["notice_group", "reservation_list", "reservation_group", "search-list"]:
+            doc_boxes = self.find_documents(side_list)
+            if find_name in ["notice_group", "search-list"]:
+                return doc_boxes[0]
+            if find_name == "reservation_list":
+                return doc_boxes[1].children()
+            if find_name == "reservation_group":
+                return next((item for item in side_list if item.element_info.control_type == "Document" 
+                             and item.element_info.automation_id == "reservation"), None)
     
     def get_popup_field(self):
+        """대시보드 웹 팝업 찾기"""
         side_field = self.side_window.child_window(class_name="Chrome_RenderWidgetHostHWND").wrapper_object()
         return_data = side_field.children()
         custom_wrapper = None
@@ -82,6 +111,7 @@ class SidePage:
         if notice_group:
             for group_items in notice_group.children():
                 if group_items.element_info.control_type == "Edit":
+                    group_items.set_text("")
                     group_items.set_text(set_value)
                     time.sleep(0.5)
                     group_items.set_focus()
@@ -97,8 +127,7 @@ class SidePage:
         if result:
             for group_item in result.children():
                 if group_item.element_info.control_type == "List":
-                    for items in group_item.children():
-                        return_arr.append(items.children())
+                    return_arr.extend([items.children() for items in group_item.children()])
             return return_arr
         else:
             print("등록 된 공지사항이 없습니다.")
@@ -106,8 +135,7 @@ class SidePage:
     # 타임비교 코드 공통함수로 변경
     def compare_notice(self, notice, compare_time):
         """공지사항 비교 확인"""
-        return_data = self.get_notice()
-        result = [sub_list for sub_list in return_data if any(notice in str(item) for item in sub_list)]
+        result = self.get_single_notice(notice)
         if not result == []:
             result_time = result[0][0].window_text()
             
@@ -122,11 +150,52 @@ class SidePage:
                 return False
             return True
 
+    def get_single_notice(self,notice):
+        """작성된 공지사항 객체 찾기"""
+        return_data = self.get_notice()
+        return [sub_list for sub_list in return_data if any(notice in str(item) for item in sub_list)]
+
+    def get_notice_update_form(self):
+        """업데이트 폼 가져오기"""
+        return_data = self.get_notice()
+        for data_list in return_data:
+            for item in data_list:
+                if item.element_info.control_type == "Edit":
+                    return data_list
+
+    def update_notice(self, notice):
+        """공지사항 수정"""
+        result = self.get_single_notice(notice)
+        edit_form = None
+        update_save_btn = None
+        if result is not []:
+            for el in result:
+                for item in el:
+                    if item.element_info.control_type == "Text" and item.element_info.name == notice:
+                        item.click_input()
+                        time.sleep(0.5)
+                        break
+                    
+        update_notice_form = self.get_notice_update_form()
+        if update_notice_form is not []:
+            for element_list in update_notice_form:
+                if element_list.element_info.control_type == "Edit":
+                    edit_form = element_list
+                if (element_list.element_info.control_type == "Button"
+                    and element_list.element_info.name == "저장"):
+                    update_save_btn = element_list
+                            
+        edit_form.click_input()  # 클릭
+        edit_form.set_focus()  # 포커스 맞추기
+        edit_form.type_keys("^a{BACKSPACE}")  # 기존 내용 삭제
+        edit_form.type_keys("업데이트", with_spaces=True)  # 새로운 내용 입력
+        time.sleep(0.5)
+        update_save_btn.click_input()  # 저장 버튼 클릭
+        
     # 삭제객체 다건있을경우 시간비교 추가 필요    
     def delete_notice(self, notice):
         """공지사항 삭제"""
-        return_data = self.get_notice()
-        result = [sub_list for sub_list in return_data if any(notice in str(item) for item in sub_list)]
+        result = self.get_single_notice(notice)
         close_btn = None
         time_text = None
         content_text = None
@@ -156,3 +225,44 @@ class SidePage:
         else:
             print("등록된 공지사항이 없습니다.")
         
+    def search_user(self, username):
+        """유저 검색"""
+        search_edit = self.side_find_field("search_edit")
+
+        search_button = self.side_find_field("search_btn")
+        
+        if search_edit:
+            search_edit.set_focus()
+            search_edit.set_text("")
+            search_edit.set_text(username)
+            if search_button:
+                search_button.click()
+    
+    def get_search_field(self):
+        get_srh_list = self.side_find_field("search-list")
+        return get_srh_list.children()
+        
+    def get_child_list(self, object_list):
+        list_items = []
+        list_item = object_list[0]
+        for item in list_item.children():
+            list_items.append(item)
+        return list_items
+    
+    
+    def get_search_user_list(self):
+        search_user_list = self.get_search_field()
+        list_object = self.find_lists(search_user_list)
+        return list_object
+
+    def compare_search_user(self, username=None, chart_numbe=None):
+        user_list = self.get_search_user_list()
+        if username is not None and chart_numbe is not None:
+            return
+        elif username is not None:
+            return
+        elif chart_numbe is not None:
+            return
+    
+    def get_save_user_popup(self):
+        return
