@@ -6,6 +6,7 @@ from pywinauto import Desktop, application
 
 import config
 from locators.login_locators import LoginLocators
+from locators.receive_locators import ReceiveLocators
 from utils.app_screen_shot import window_screen_shot
 
 
@@ -65,7 +66,11 @@ class AppManger:
         except application.AppStartError:
             print("앱 미설치 또는 앱 미존재")
             window_screen_shot("app_connect_fail")
-            
+    
+    def receive_connect(self):
+        if self.version_search(ReceiveLocators.RECEIVE_POPUP_TITLE):
+            return self.motion_app_connect(self.motion_app)
+    
     def check_admin(self):
         if not ctypes.windll.shell32.IsUserAnAdmin():
             ctypes.windll.shell32.ShellExecuteW(

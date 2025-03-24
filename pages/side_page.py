@@ -7,10 +7,11 @@ from locators.dashboard_locators import DashboardLocators
 from locators.side_field_locators import SideFieldLocators
 from pages.base_page import *
 from utils.app_manager import AppManger
+from utils.element_finder import *
 
 
 class SidePage:
-    def __init__(self,app):
+    def __init__(self):
         app = AppManger()
         app_title = app.version_search(DashboardLocators.MAIN_FORM_TITLE)
         self.side_window = Desktop(backend="uia").window(title=app_title)
@@ -19,36 +20,13 @@ class SidePage:
         # self.dashboard_reset();
         # self.side_field = self.base_page.find_element(auto_id=SideFieldLocators.SIDE_GROUP)
         
-    def dashboard_reset(self):
-        self.base_page.dashboard_reset(self.side_window)
-        return
+    # def dashboard_reset(self):
+    #     self.base_page.dashboard_reset(self.side_window)
+    #     return
     
     def get_side_field(self):
         """사이드 필드 객체 가져오기"""
         return self.side_window.child_window(class_name="Chrome_RenderWidgetHostHWND").wrapper_object()
-
-    def find_text(self, side_list):
-        return [item for item in side_list if item.element_info.control_type =="Text"]
-
-    def find_buttons(self, side_list):
-        """버튼 찾기"""
-        return [item for item in side_list if item.element_info.control_type == "Button"]
-
-    def find_button_by_name(self, side_list, name):
-        """버튼 특정 이름가진 객체 찾기"""
-        return next((item for item in side_list if item.element_info.control_type == "Button" and item.element_info.name == name), None)
-
-    def find_lists(self, side_list):
-        """리스트 객체찾기"""
-        return [item for item in side_list if item.element_info.control_type == "List"]
-
-    def find_edit_by_automation_id(self, side_list, automation_id):
-        """Edit 객체 찾기"""
-        return next((item for item in side_list if item.element_info.control_type == "Edit" and item.element_info.automation_id == automation_id), None)
-
-    def find_documents(self, side_list):
-        """Document 객체 찾기"""
-        return [item for item in side_list if item.element_info.control_type == "Document"]
 
     def side_find_field(self, find_name):
         """사이드 영역 객체 찾기"""
@@ -56,26 +34,26 @@ class SidePage:
         side_list = side_field.children()
         
         if find_name in ["bookmark_btn", "search_btn", "today_btn"]:
-            button_boxes = self.find_buttons(side_list)
+            button_boxes = ElementFinder.find_buttons(side_list)
             if find_name == "bookmark_btn":
                 return button_boxes[0]
             if find_name == "search_btn":
-                return self.find_button_by_name(side_list, "검색")
+                return ElementFinder.find_button_by_name(side_list, "검색")
             if find_name == "today_btn":
-                return self.find_button_by_name(side_list, "오늘")
+                return ElementFinder.find_button_by_name(side_list, "오늘")
         
         if find_name in ["doctor_filter_list", "insurance_filter_list"]:
-            list_boxes = self.find_lists(side_list)
+            list_boxes = ElementFinder.find_lists(side_list)
             if find_name == "doctor_filter_list":
                 return list_boxes[0]
             if find_name == "insurance_filter_list":
                 return list_boxes[1]
         
         if find_name == "search_edit":
-            return self.find_edit_by_automation_id(side_list, "srch-val")
+            return ElementFinder.find_edit_by_automation_id(side_list, "srch-val")
         
         if find_name in ["notice_group", "reservation_list", "reservation_group", "search-list"]:
-            doc_boxes = self.find_documents(side_list)
+            doc_boxes = ElementFinder.find_documents(side_list)
             if find_name in ["notice_group", "search-list"]:
                 return doc_boxes[0]
             if find_name == "reservation_list":
@@ -102,10 +80,7 @@ class SidePage:
                         popup_btn_list.append(items)
         
         return popup_btn_list
-    
-    def get_side_user_fliter(self):
-        return
-    
+
     def save_notice(self, set_value):
         """공지사항 입력"""
         notice_group = self.side_find_field("notice_group")
@@ -227,7 +202,7 @@ class SidePage:
             print("등록된 공지사항이 없습니다.")
         
     def search_user(self, username):
-        """유저 검색"""
+        """유저 검색하기"""
         search_edit = self.side_find_field("search_edit")
         search_button = self.side_find_field("search_btn")
         
@@ -239,10 +214,12 @@ class SidePage:
                 search_button.click()
     
     def get_search_field(self):
+        """검색영역 가져오기"""
         get_srh_list = self.side_find_field("search-list")
         return get_srh_list.children()
         
     def get_child_list(self, object_list):
+        """검색영역 리스트 가져오기"""
         list_items = []
         for list_item in object_list:
             for items in list_item.children():
@@ -250,34 +227,61 @@ class SidePage:
         return list_items
     
     def get_search_user_list(self):
+        """검색영역 유저리스트 가져오기"""
         search_user_list = self.get_search_field()
         list_object = self.get_child_list(search_user_list)
         return list_object
 
-    def compare_list(self, user_list, username=None, chart_number=None):
+    def compare_user_list(self, user_list, username=None, chart_number=None):
+        """검색 유저 비교 및 결과 리턴"""
         for list_item in user_list:
             for item in list_item.children():
                 if item.element_info.control_type != "Text":
                     continue
 
                 name = item.element_info.name
-                if username and name in username:
-                    return list_item
-                if chart_number and name in chart_number:
-                    return list_item
-                if username and chart_number and name in [username, chart_number]:
-                    return list_item
-
+                if username and chart_number:
+                    if username in name:
+                        continue
+                    if chart_number in name:
+                        return list_item
+                elif username:
+                    if username in name:
+                        return list_item
+                elif chart_number:
+                    if chart_number in name:
+                        return list_item
+                    
     def compare_search_user(self, username=None, chart_number=None):
+        """검색 환자 리턴"""
         user_list = self.get_search_user_list()
-        if username is not None and chart_number is not None:
-            if self.compare_list(user_list, username, chart_number) is []:
+        if username is not None or chart_number is not None:
+            compare_user =  self.compare_user_list(user_list, username, chart_number)
+            if compare_user is []:
                 print("등록된 유저를 찾을 수 없습니다.")
+            else:
+                return compare_user
         else:
             print(f"환자명 / 차트번호가 입력되지 않았습니다.")
-    def user_reserve(sefl,username=None, chart_nmumber=None):
-        
-        return
+            
+    def search_get_button(self,username, chart_number):
+        """검색 환자 버튼 가져오기"""
+        select_user = self.compare_search_user(username, chart_number)
+        return ElementFinder.find_buttons(select_user.children())
+            
+    def search_user_reserve(self,username=None, chart_number=None):
+        """검색 환자 예약화면 진입"""
+        buttons = self.search_get_button(username,chart_number) 
+        for el in buttons:
+            if el.element_info.name == "예약하기":
+                el.click()
     
-    def get_save_user_popup(self):
+    def search_user_receive(self, username=None, chart_number=None):
+        """검색 환자 접수화면 진입"""
+        buttons = self.search_get_button(username, chart_number)
+        for el in buttons:
+            if el.element_info.name == "접수하기":
+                el.click()
+    
+    def save_user_popup(self):
         return
