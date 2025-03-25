@@ -68,6 +68,5 @@ class ReceivePage:
         for btn in btn_list:
             if btn.element_info.name == "접수":
                 btn.click()
-                
                 break
     

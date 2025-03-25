@@ -201,7 +201,7 @@ class SidePage:
         else:
             print("등록된 공지사항이 없습니다.")
         
-    def search_user(self, username):
+    def search_user(self, search_text):
         """유저 검색하기"""
         search_edit = self.side_find_field("search_edit")
         search_button = self.side_find_field("search_btn")
@@ -209,7 +209,7 @@ class SidePage:
         if search_edit:
             search_edit.set_focus()
             search_edit.set_text("")
-            search_edit.set_text(username)
+            search_edit.set_text(search_text)
             if search_button:
                 search_button.click()
     
@@ -284,4 +284,9 @@ class SidePage:
                 el.click()
     
     def save_user_popup(self):
+        """유저 저장 팝업 진입"""
+        search_user_list = self.get_search_field()
+        for items in search_user_list:
+            if items.element_info.control_type == "Button" and items.element_info.name == "환자 등록 후 예약":
+                items.click()
         return
