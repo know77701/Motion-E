@@ -459,10 +459,13 @@ class ChartFunc():
             for items in sec_i.children():
                 if items.element_info.control_type == "Pane":
                     list_view_btn = items.children()
-                if items.element_info.control_type == "Custom":
-                    rsrv_list.append(items)
 
         list_view_btn[0].click()
+
+        for sec_i in sec_child_list:
+            for items in sec_i.children():
+                if items.element_info.control_type == "Custom":
+                    rsrv_list.append(items)
 
         random_rsrv_list = random.choice(rsrv_list)
         random_rsrv_list.click_input()
@@ -496,14 +499,16 @@ class ChartFunc():
             corporal_edit = None
             edit_list = []
             corporal_item_list = None
-
+            
+            
             for sec_item in sec_list.children():
                 for items in sec_item.children():
                     if items.element_info.name == "처방전 출력" and items.element_info.control_type == "Button":
                         print_btn = items
                     if items.element_info.name == "저장" and items.element_info.control_type == "Button":
                         save_btn = items
-
+        
+                    
             # 처방 입력영역
             for th_item in th_list.children():
                 for items in th_item.children():
@@ -525,18 +530,18 @@ class ChartFunc():
                     if items.element_info.control_type == "ComboBox" and items.element_info.automation_id == "cmbChrgDrId":
                         sec_item = items.children()
                         sec_item[0].set_text(random_doc_user)
-
+            
             if corporal_edit is not None:
                 corporal_edit.set_text("감기")
                 keyboard.send_keys("{ENTER}")
             else:
                 print("상병입력 불가")
-
+            
             if prescription_edit is not None:
                 prescription_edit.set_text("프로")
             else:
                 print("처방 입력 불가")
-
+                
             if edit_list is not []:
                 edit_list[0].set_text("증상경과 작성")
                 edit_list[1].set_text("진료기록 작성")
@@ -549,16 +554,14 @@ class ChartFunc():
                     if list_item.element_info.control_type == "Pane" and list_item.element_info.automation_id == "pnlSetPrscOrdr":
                         for order_items in list_item.children():
                             if order_items.element_info.control_type == "Table":
-                                corporal_item_list = random.choice(
-                                    order_items.children())
+                                corporal_item_list = random.choice(order_items.children())
                     if list_item.element_info.control_type == "Pane" and list_item.element_info.automation_id == "cpnlSetPrscSrchSick":
                         for items in list_item.children():
                             for item in items.children():
                                 for item_child in item.children():
                                     for i in item_child.children():
                                         if i.element_info.control_type == "Table" and i.element_info.automation_id == "gvSrchSickList":
-                                            prescription_item = random.choice(
-                                                i.children())
+                                            prescription_item = random.choice(i.children())
 
             corporal_item_list.click_input()
             time.sleep(1)
@@ -585,7 +588,7 @@ class ChartFunc():
                         for items in list_item.children():
                             if items.element_info.control_type == "Button" and items.element_info.name == "등록":
                                 save_btn = items
-
+                                
             if save_btn is not None:
                 save_btn.click()
             drawing_form = self.return_window(auto_id="DrawingForm")

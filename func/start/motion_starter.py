@@ -1,9 +1,10 @@
-from pywinauto import application, Desktop
 import time
+
+from pywinauto import Desktop, application
+
 from func.publicFunc.public_func import *
 
 MAX_RETRY = 3
-
 
 class MotionStarter():
     def __init__(self):
