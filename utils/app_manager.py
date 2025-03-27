@@ -5,16 +5,21 @@ import time
 from pywinauto import Desktop, application
 
 import config
+from locators.login_locators import LoginLocators
+from locators.receive_locators import ReceiveLocators
 from utils.app_screen_shot import window_screen_shot
 
 
 class AppManger:
     def __init__(self):
         self.backend = "uia"
+        self.win_32_backend = "win32"
         self.win32_app = application.Application()
-        self.motion_app = application.Application()
+        self.motion_app = application.Application(backend=self.backend)
         
+   
     def version_search(self, search_title):
+        
         """특정 창이 열려있는지 확인"""
         windows = Desktop(backend=self.backend).windows()
         try:
@@ -27,26 +32,26 @@ class AppManger:
             
                 
     def login_form_connect(self,win32_app):
-        app = win32_app.connect(path=config.PROCESS_TITLE)
+        app = win32_app.connect(title=config.PROCESS_TITLE)
         app.top_window().set_focus()
         return app
             
     def motion_app_connect(self, motion_app):
-        app = motion_app.connect(path=config.PROCESS_TITLE)
+        version_text = self.version_search(config.MOTION_VERSION_TITLE)
+        app = motion_app.connect(title=version_text)
         app.top_window().set_focus()
         return app
             
     def app_connect(self, retries=0):
-        from locators.login_locators import LoginLocators
         try:
-            if self.version_search('모션.ver'):
+            if self.version_search(config.MOTION_VERSION_TITLE):
                 return self.motion_app_connect(self.motion_app)
             elif self.version_search(LoginLocators.LOGIN_FORM_TITLE):
                 return self.login_form_connect(self.win32_app)
             else:
                 self.win32_app.start(config.APP_PATH)
-                motion_window = self.motion_app_connect(self.motion_app)
                 time.sleep(3)
+                motion_window = self.motion_app_connect(self.motion_app)
                 return motion_window
                 
         except application.ProcessNotFoundError as e:
@@ -61,7 +66,11 @@ class AppManger:
         except application.AppStartError:
             print("앱 미설치 또는 앱 미존재")
             window_screen_shot("app_connect_fail")
-            
+    
+    def receive_connect(self):
+        if self.version_search(ReceiveLocators.RECEIVE_POPUP_TITLE):
+            return self.motion_app_connect(self.motion_app)
+    
     def check_admin(self):
         if not ctypes.windll.shell32.IsUserAnAdmin():
             ctypes.windll.shell32.ShellExecuteW(
