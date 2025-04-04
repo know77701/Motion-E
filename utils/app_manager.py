@@ -4,9 +4,9 @@ import time
 
 from pywinauto import Desktop, application
 
-import config
 from locators.login_locators import LoginLocators
 from locators.receive_locators import ReceiveLocators
+from locators.util_locators import UtilLocators
 from utils.app_screen_shot import window_screen_shot
 
 
@@ -19,7 +19,6 @@ class AppManger:
         
    
     def version_search(self, search_title):
-        
         """특정 창이 열려있는지 확인"""
         windows = Desktop(backend=self.backend).windows()
         try:
@@ -32,24 +31,24 @@ class AppManger:
             
                 
     def login_form_connect(self,win32_app):
-        app = win32_app.connect(title=config.PROCESS_TITLE)
+        app = win32_app.connect(title=UtilLocators.PROCESS_TITLE)
         app.top_window().set_focus()
         return app
             
     def motion_app_connect(self, motion_app):
-        version_text = self.version_search(config.MOTION_VERSION_TITLE)
+        version_text = self.version_search(UtilLocators.MOTION_VERSION_TITLE)
         app = motion_app.connect(title=version_text)
         app.top_window().set_focus()
         return app
             
     def app_connect(self, retries=0):
         try:
-            if self.version_search(config.MOTION_VERSION_TITLE):
+            if self.version_search(UtilLocators.MOTION_VERSION_TITLE):
                 return self.motion_app_connect(self.motion_app)
             elif self.version_search(LoginLocators.LOGIN_FORM_TITLE):
                 return self.login_form_connect(self.win32_app)
             else:
-                self.win32_app.start(config.APP_PATH)
+                self.win32_app.start(UtilLocators.APP_PATH)
                 time.sleep(3)
                 motion_window = self.motion_app_connect(self.motion_app)
                 return motion_window
@@ -57,7 +56,7 @@ class AppManger:
         except application.ProcessNotFoundError as e:
             print("앱 찾기 실패 :", e)
             window_screen_shot("app_connect_fail")
-            if retries < config.MAX_RETRY:
+            if retries < 3:
                 retries += 1
                 print(f"재시도 횟수: {retries}")
                 self.app_connect(retries)

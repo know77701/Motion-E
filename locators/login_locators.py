@@ -8,3 +8,4 @@ class LoginLocators:
     YAKIOH_CANCLE_BUTTON_ID = "btnCancle"
     YAKIHO_SAVE_BUTTON_ID = "btnSave"
     SYSTEM_CANCLE_BUTTON_ID = "Close"
+    

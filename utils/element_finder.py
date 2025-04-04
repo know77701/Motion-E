@@ -11,25 +11,25 @@ class ElementFinder:
 
     @staticmethod
     def find_button_by_name(elements, name):
-        return next(
-            (item for item in elements if item.element_info.control_type == "Button" and item.element_info.name == name),
-            None
-        )
-
+        return next((item for item in elements if item.element_info.control_type == "Button" 
+                    and item.element_info.name == name),None)
     @staticmethod
     def find_lists(elements):
         return [item for item in elements if item.element_info.control_type == "List"]
 
     @staticmethod
     def find_edit_by_automation_id(elements, automation_id):
-        return next(
-            (item for item in elements if item.element_info.control_type == "Edit" and item.element_info.automation_id == automation_id),
-            None
-        )
+        return next((item for item in elements if item.element_info.control_type == "Edit" 
+                    and item.element_info.automation_id == automation_id),None)
 
     @staticmethod
     def find_documents(elements):
         return [item for item in elements if item.element_info.control_type == "Document"]
+    
+    @staticmethod
+    def find_documents_by_automation_id(elements, automation_id):
+        return next((item for item in elements if item.element_info.control_type == "Document" 
+                             and item.element_info.automation_id == automation_id), None)
     
     @staticmethod
     def find_edit(elements):
@@ -38,3 +38,8 @@ class ElementFinder:
     @staticmethod
     def find_pane(elements):
         return [item for item in elements if item.element_info.control_type == "Pane"]
+    
+    @staticmethod
+    def find_group_by_automation_id(elements, automation_id):
+        return next((item for item in elements if item.element_info.control_type == "Group"
+                 and item.element_info.automation_id == automation_id), None)
