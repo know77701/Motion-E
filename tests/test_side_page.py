@@ -46,7 +46,6 @@ class TestSidePage:
         
     def test_update_notice(self):
         print("공지사항 업데이트 시작")
-        
         self.side_page.update_notice(notice_content=self.notice_content, 
                                       create_time=self.create_time, 
                                       update_content=self.update_content)

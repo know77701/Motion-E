@@ -1,4 +1,3 @@
-
 class SideFieldLocators:
     SIDE_DOCTOR_FILTER_LIST = "sideDoctorList"
     PATIENT_SEARCH_EDIT = "srch-val"
