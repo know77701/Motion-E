@@ -1,5 +1,19 @@
+from pywinauto import Desktop
+
+from locators.dashboard_locators import DashboardLocators
+from utils.app_manager import AppManger
+
+
 class ElementFinder:
-    """UI 요소를 찾는 유틸리티 클래스"""
+    """UI 요소를 찾는 유틸 클래스"""
+    def __init__(self):
+        app = AppManger()
+        app_title = app.version_search(DashboardLocators.MAIN_FORM_TITLE)
+        self.side_window = Desktop(backend="uia").window(title=app_title)
+            
+    def get_chrome_field(self):
+        """사이드 필드 객체 가져오기"""
+        return self.side_window.child_window(class_name="Chrome_RenderWidgetHostHWND").wrapper_object()
 
     @staticmethod
     def find_text(elements):

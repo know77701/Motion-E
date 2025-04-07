@@ -1,5 +1,6 @@
 from pywinauto import Desktop
 
+from dto.user_dto import UserDTO
 from locators.receive_locators import ReceiveLocators
 from utils.app_manager import AppManger
 from utils.element_finder import ElementFinder
@@ -24,27 +25,24 @@ class ReceivePage:
         if find_name in ["get_dropbox"]:
             return ElementFinder.find_text(elements)
     
-    def get_verify_popup_text(self, username=None, chart_number=None):
+    def get_compare_popup_text(self, user_dto : UserDTO):
         text_elements = self.get_popup_object("get_text_data")
         result_data = False
         for el in text_elements:
             name = el.element_info.name
-            if username and chart_number:
-                if username in name:
+            if user_dto.name and user_dto.chart_no:
+                if user_dto.name in name:
                     continue
-                if chart_number in name:
+                if user_dto.chart_no in name:
                     result_data = True
-            elif username:
-                if username in name:
+            elif user_dto.name:
+                if user_dto.name in name:
                     result_data = True
-            elif chart_number:
-                if chart_number in chart_number:
+            elif user_dto.chart_no:
+                if user_dto.chart_no in name:
                     result_data =True
         return result_data
 
-    def verify_receive_info(self, username=None, chart_number=None):
-        if not self.get_verify_popup_text(username, chart_number):
-            print("접수팝업 환자 정보를 확인해주세요")
 
     def get_memo_edit(self):
         window_list = self.side_window.children()

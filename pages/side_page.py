@@ -15,10 +15,8 @@ from utils.element_finder import *
 
 class SidePage:
     def __init__(self):
-        app = AppManger()
-        app_title = app.version_search(DashboardLocators.MAIN_FORM_TITLE)
-        self.side_window = Desktop(backend="uia").window(title=app_title)
-        self.base_page = BasePage(app)
+        self.finder = ElementFinder()
+
         
         # self.dashboard_reset();
         # self.side_field = self.base_page.find_element(auto_id=SideFieldLocators.SIDE_GROUP)
@@ -26,16 +24,10 @@ class SidePage:
     # def dashboard_reset(self):
     #     self.base_page.dashboard_reset(self.side_window)
     #     return
-    
-    
-    def get_side_field(self):
-        """사이드 필드 객체 가져오기"""
-        return self.side_window.child_window(class_name="Chrome_RenderWidgetHostHWND").wrapper_object()
-
 
     def side_find_field(self, find_name):
         """사이드 영역 객체 찾기"""
-        side_field = self.get_side_field()
+        side_field = self.finder.get_chrome_field()
         side_list = side_field.children()
     
         if find_name in ["bookmark_btn", "search_btn", "today_btn"]:
