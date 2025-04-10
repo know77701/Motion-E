@@ -23,25 +23,22 @@ class TestDashBoardPage:
         self.update_content = "업데이트"
         self.user_dto = UserDTO(chart_no=None,name="소말리QA", mobile_no="010-7441-7631",jno=None)
         self.dashboard_page = DashBoardPage()
-        self.test_dashboard()
+        self.receive_page = ReceivePage()
         # self.test_create_notice()
         # self.test_update_notice()
         # self.test_delete_notice()
+        self.test_open_chart()
         # self.test_save_user()
         # self.test_reseve_user()
-        # self.receive_page = ReceivePage()
         
         # self.start_sub_process_event = multiprocessing.Event()
         # self.sub_process_done_event = multiprocessing.Event()
         # self.test()
-    
-    
-    def test_dashboard(self):
-        self.dashboard_page.get_reservation_list()
-        # self.dashboard_page.get_reception_list()
-        # self.dashboard_page.get_treatment_list()
-        # self.dashboard_page.get_payment_list()
-        
+
+    def test_open_chart(self):
+        print("차트 진입 테스트 시작")
+        self.user_dto.chart_no = "0000002351"
+        self.dashboard_page.open_chart(self.user_dto.chart_no)
     
     def test_create_notice(self):
         print("공지사항 생성 시작")
@@ -99,8 +96,20 @@ class TestDashBoardPage:
             print("접수 팝업 데이터를 확인해주세요.")
         self.receive_page.write_receive_memo("user memo", "receive memo")
         self.receive_page.submit_receive()
-
     
+    def test_reservation(self):
+        self.dashboard_page.reservation_cancel(self.user_dto.chart_no)
+        if self.dashboard_page.get_reservation_list(self.user_dto.chart_no):
+            print("예약 취소가 되지않았습니다.")
+   
+    def test_reception(self):
+        self.dashboard_page.reception_cancel(self.user_dto.chart_no)
+        if self.dashboard_page.get_reception_list(self.user_dto.chart_no):
+            print("접수 취소가 되지않았습니다.")
 
+    def test_reserve_user_reception(self):
+        self.dashboard_page.get_reception_list(self.user_dto.chart_no)
+    
+    
 if __name__ == "__main__": 
     test = TestDashBoardPage()

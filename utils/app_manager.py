@@ -4,6 +4,7 @@ import time
 
 from pywinauto import Desktop, application
 
+from locators.chart_locators import ChartLocators
 from locators.login_locators import LoginLocators
 from locators.receive_locators import ReceiveLocators
 from locators.util_locators import UtilLocators
@@ -18,17 +19,27 @@ class AppManger:
         self.motion_app = application.Application(backend=self.backend)
         
    
-    def version_search(self, search_title):
+    def version_search(self, search_title=None, auto_id=None):
         """특정 창이 열려있는지 확인"""
-        windows = Desktop(backend=self.backend).windows()
-        try:
-            for window in windows:
-                if search_title in window.window_text():
-                    return window.window_text()
-        except Exception as e:
-            print("버전 찾기 실패", e)
-            window_screen_shot("version_search_fail")
+        if auto_id:
+            windows = Desktop(backend=self.backend).windows()
+            try:
+                for window in windows:
+                    if window.automation_id() == auto_id:
+                        return window.window_text()
+            except Exception as e:
+                print("버전 찾기 실패", e)
             
+        else:
+            windows = Desktop(backend=self.backend).windows()
+            try:
+                for window in windows:
+                    if search_title in window.window_text():
+                        return window.window_text()
+            except Exception as e:
+                print("버전 찾기 실패", e)
+                window_screen_shot("version_search_fail")
+    
                 
     def login_form_connect(self,win32_app):
         app = win32_app.connect(title=UtilLocators.PROCESS_TITLE)
@@ -36,16 +47,24 @@ class AppManger:
         return app
             
     def motion_app_connect(self, motion_app):
-        version_text = self.version_search(UtilLocators.MOTION_VERSION_TITLE)
+        version_text = self.version_search(UtilLocators.MOTION_VERSION_TITLE, auto_id=None)
         app = motion_app.connect(title=version_text)
         app.top_window().set_focus()
         return app
-            
+    
+    def receive_connect(self):
+        if self.version_search(ReceiveLocators.RECEIVE_POPUP_TITLE, auto_id=None):
+            return self.motion_app_connect(self.motion_app)
+        
+    def chart_connect(self):
+        if self.version_search(search_title=None, auto_id=ChartLocators.CHART_AUTO_ID):
+            return self.motion_app_connect(self.motion_app)
+    
     def app_connect(self, retries=0):
         try:
-            if self.version_search(UtilLocators.MOTION_VERSION_TITLE):
+            if self.version_search(UtilLocators.MOTION_VERSION_TITLE, auto_id=None):
                 return self.motion_app_connect(self.motion_app)
-            elif self.version_search(LoginLocators.LOGIN_FORM_TITLE):
+            elif self.version_search(LoginLocators.LOGIN_FORM_TITLE, auto_id=None):
                 return self.login_form_connect(self.win32_app)
             else:
                 self.win32_app.start(UtilLocators.APP_PATH)
@@ -66,10 +85,8 @@ class AppManger:
             print("앱 미설치 또는 앱 미존재")
             window_screen_shot("app_connect_fail")
     
-    def receive_connect(self):
-        if self.version_search(ReceiveLocators.RECEIVE_POPUP_TITLE):
-            return self.motion_app_connect(self.motion_app)
-    
+
+        
     def check_admin(self):
         if not ctypes.windll.shell32.IsUserAnAdmin():
             ctypes.windll.shell32.ShellExecuteW(
