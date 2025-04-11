@@ -69,16 +69,12 @@ class SidePage:
         custom_wrapper = None
         popup_btn_list = []
         
-        for el in return_data:
-            if el.element_info.control_type == "Custom":
-                custom_wrapper = el
-                
-        for wrapper_item in custom_wrapper.children():
-            if wrapper_item.element_info.control_type == "Group":
-                for items in wrapper_item.children():
-                    if items.element_info.control_type == "Button":
-                        popup_btn_list.append(items)
+        custom_wrapper = ElementFinder.find_custom(return_data)
+        group_list = ElementFinder.find_group(custom_wrapper.children())
         
+        for items in group_list.children():
+            if items.element_info.control_type == "Button":
+                popup_btn_list.append(items)
         return popup_btn_list
 
 
@@ -86,14 +82,13 @@ class SidePage:
         """공지사항 입력"""
         notice_group = self.side_find_field("notice_group")
         if notice_group:
-            for group_items in notice_group:
-                if group_items.element_info.control_type == "Edit":
-                    group_items.set_text("")
-                    group_items.set_text(set_value)
-                    time.sleep(0.5)
-                    group_items.set_focus()
-                    send_keys("{ENTER}")
-                    return datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
+            edit_item = ElementFinder.find_edit(notice_group)
+            edit_item.set_text("")
+            edit_item.set_text(set_value)
+            time.sleep(0.5)
+            edit_item.set_focus()
+            send_keys("{ENTER}")
+            return datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
         else:
             print("공지사항 등록 폼을 찾을 수 없습니다.")
         
@@ -165,9 +160,7 @@ class SidePage:
         """업데이트 폼 가져오기"""
         return_data = self.get_notice()
         for data_list in return_data:
-            for item in data_list:
-                if item.element_info.control_type == "Edit":
-                    return data_list
+            return ElementFinder.find_edit(data_list)
 
     def update_notice(self, notice_content,create_time,update_content):
         """공지사항 수정"""
@@ -175,18 +168,14 @@ class SidePage:
         update_save_btn = None
         if result is not []:
             for el in result:
-                for item in el:
-                    if item.element_info.control_type == "Text" and item.element_info.name == notice_content:
-                        item.click_input()
-                        time.sleep(0.5)
-                        break
+                item = ElementFinder.find_text_by_name(el, notice_content)
+                item.click()
+                time.sleep(0.5)
+                break
                     
         update_notice_form = self.get_notice_update_form()
         if update_notice_form is not [] and update_notice_form is not None:
-            for element_list in update_notice_form:
-                if (element_list.element_info.control_type == "Button"
-                    and element_list.element_info.name == "저장"):
-                    update_save_btn = element_list
+            update_save_btn = ElementFinder.find_button_by_name(update_notice_form, "저장")
         time.sleep(0.5)
         send_keys("^a{BACKSPACE}")
         send_keys(update_content)
@@ -204,22 +193,17 @@ class SidePage:
         
         if not result == []:
             for sub_list in result:
-                for item in sub_list:
-                    if (item.element_info.control_type == "Button" 
-                        and item.element_info.name == "닫기"):
-                            close_btn = item
-                    if (item.element_info.control_type == "Text"):
-                        if item.element_info.name == notice_content:
-                            time_text = item.window_text()
-                        else:
-                            content_text = item.window_text()
-            
+                close_btn = ElementFinder.find_button_by_name(sub_list, "닫기")
+                time_text = ElementFinder.find_text_by_name(sub_list, notice_content)
+                content_text = ElementFinder.find_text(sub_list)
+                break
+
             close_btn.click()
             return_children = self.get_popup_field()
             if return_children:
-                if (return_children[0].element_info.control_type == "Button"
-                    and return_children[0].element_info.name == "예"):
-                        return_children[0].click()
+                delete_btn = ElementFinder.find_button_by_name(return_children, "예")
+                if delete_btn:
+                    delete_btn.click()
             else:
                 print("삭제 버튼을 찾을 수 없습니다.")
         else:
@@ -306,9 +290,8 @@ class SidePage:
     def save_user_popup(self):
         """유저 저장 팝업 진입"""
         search_user_list = self.side_find_field("search_list")
-        for items in search_user_list:
-            if items.element_info.control_type == "Button" and items.element_info.name == "환자 등록 후 예약":
-                items.click()
+        save_reservation_btn = ElementFinder.find_button_by_name(search_user_list, "환자 등록 후 예약")
+        save_reservation_btn.click()
        
     def combo_item_retrun(self, combo_list):
         """예약시간 랜덤 선택"""
@@ -335,7 +318,6 @@ class SidePage:
                     continue
             break
         send_keys(select_time)
-        
                 
     def get_reserve_elements(self, find_type: str):
         """

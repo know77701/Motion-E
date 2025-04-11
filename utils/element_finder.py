@@ -71,7 +71,16 @@ class ElementFinder:
     
     @staticmethod
     def find_edit(elements):
+        return next((item for item in elements if item.element_info.control_type == "Edit"), None)
+    
+    @staticmethod
+    def find_edits(elements):
         return [item for item in elements if item.element_info.control_type == "Edit"]
+    
+    @staticmethod
+    def find_edit_by_name(elements, name):
+        return next(item for item in elements if item.element_info.control_type == "Edit" 
+                    and name in item.element_info.name)
     
     @staticmethod
     def find_pane(elements):
@@ -105,3 +114,10 @@ class ElementFinder:
     def find_pane_by_auto_id(elements,id):
         return next((item for item in elements if item.element_info.control_type == "Pane"
                      and item.element_info.automation_id == id), None)
+    @staticmethod
+    def find_link_by_name(elements,name):
+        return next((item for item in elements if item.element_info.control_type == "Hyperlink"
+                     and name in item.element_info.name), None)
+    @staticmethod
+    def find_links(elements):
+        return [(item for item in elements if item.element_info.control_type == "Hyperlink"), None]

@@ -39,7 +39,6 @@ class AppManger:
             except Exception as e:
                 print("버전 찾기 실패", e)
                 window_screen_shot("version_search_fail")
-    
                 
     def login_form_connect(self,win32_app):
         app = win32_app.connect(title=UtilLocators.PROCESS_TITLE)
@@ -84,11 +83,32 @@ class AppManger:
         except application.AppStartError:
             print("앱 미설치 또는 앱 미존재")
             window_screen_shot("app_connect_fail")
-    
-
         
     def check_admin(self):
         if not ctypes.windll.shell32.IsUserAnAdmin():
             ctypes.windll.shell32.ShellExecuteW(
                 None, "runas", sys.executable, ' '.join(sys.argv), None, 1)
             sys.exit()
+            
+    def mobile_number_change_fromat(self, mobile_no):
+        """모바일 번호 형식 맞추기"""
+        mobile_no = mobile_no.strip().replace("-", "")
+        
+        if not mobile_no.isdigit():
+            print("숫자가 아닌 문자가 포함되어 있습니다.")
+            return False
+
+        length = len(mobile_no)
+        if length not in [10, 11]:
+            if length == 8:
+                mobile_no = "010" + mobile_no
+                return mobile_no
+            else:
+                print("입력한 테스트 번호를 다시 확인해주세요")
+        return mobile_no
+    
+    def chart_number_change_format(self, chart_no):
+        new_chart_no = chart_no.strip().replace(" ", "")
+        formatted_chart_no = new_chart_no.zfill(10)
+        return formatted_chart_no
+            
