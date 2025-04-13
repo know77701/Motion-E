@@ -1,3 +1,4 @@
+from datetime import datetime
 from utils.app_manager import AppManger
 from utils.element_finder import ElementFinder
 
@@ -6,6 +7,7 @@ class ChartPage:
     def __init__(self):
         self.app_manager = AppManger()
         self.element_finder = ElementFinder()
+        
     
     def get_chart_field(self, find_name):
         parent_field = self.element_finder.get_chart_field()
@@ -29,23 +31,14 @@ class ChartPage:
                             print(i.children())
                 else:
                     print("테스트")
-            
+    
     def compare_user_info_get_data(self,chart_no):
+        """차트 진입 데이터 확인"""
         user_info_field = self.get_chart_field("user_info")
         return_data = ElementFinder.find_text_by_name(user_info_field.children(), chart_no)
         if not return_data:
             return False
         return True
-    
-    def create_side_memo(self, memo_content):
-        link_element = self.return_side_field_link("메모")
-        link_element.set_focus()
-        link_element.click_input()
-        eidt_element = self.return_side_memo_edit()
-        eidt_element.set_focus()
-        eidt_element.set_text(memo_content)
-        save_btn = self.return_side_memo_button()
-        save_btn.click()
     
     def get_side_memo_list(self):
         memo_field = self.get_chart_field("side_chart")
@@ -53,8 +46,10 @@ class ChartPage:
             memo_list = self.group_memo_items(item_list.children())
             if memo_list:
                 return memo_list
+        return None
     
     def group_memo_items(self, elements):
+        """작성된 사이드메모 리스트 찾기"""
         grouped = []
         start_index = None
         for i in range(len(elements)):
@@ -76,7 +71,8 @@ class ChartPage:
                 i += 5
             return grouped
     
-    def return_side_field_link(self, find_field):
+    def get_side_field_link(self, find_field):
+        """사이드메모 링크 가져오기"""
         memo_field = self.get_chart_field("side_chart")
         for item_list in memo_field:
             element = ElementFinder.find_link_by_name(item_list.children(), find_field)
@@ -84,7 +80,8 @@ class ChartPage:
                 return element
         return None
 
-    def return_side_memo_edit(self):
+    def get_side_memo_edit(self):
+        """사이드메모 저장 edit 가져오기"""
         memo_field = self.get_chart_field("side_chart")
         for item_list in memo_field:
             element =  ElementFinder.find_edit(item_list.children())
@@ -92,12 +89,36 @@ class ChartPage:
                 return element
         return None
 
-    def return_side_memo_button(self):
+    def get_side_memo_button(self):
+        """사이드메모 저장버튼 가져오기"""
         memo_field = self.get_chart_field("side_chart")
         for item_list in memo_field:
             element = ElementFinder.find_button_by_name(item_list.children(), "저장")
             if element:
                 return element
         return None
-            
+
     
+    def compare_side_memo(self, content, time):
+        memo_list = self.get_side_memo_list()
+
+        for item_list in memo_list:
+            for i in range(len(item_list)):
+                name = item_list[i].element_info.name
+                if name == content:
+                    continue
+                next_item = item_list[i + 1]
+                if next_item.element_info.name in time:
+                    return item_list
+        return None
+
+    def get_side_chart(self):
+        panel_list = self.get_chart_field("side_chart")
+        
+        for item_list in panel_list:
+            if ElementFinder.find_link_by_name(item_list.children() ,"차트"):
+                buttons = ElementFinder.find_buttons(item_list.children())
+                chart_button = buttons[1] if len(buttons) > 1 else None
+                chart_button.click()
+                break
+            

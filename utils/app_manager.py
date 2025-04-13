@@ -1,9 +1,8 @@
 import ctypes
 import sys
 import time
-
 from pywinauto import Desktop, application
-
+from datetime import datetime
 from locators.chart_locators import ChartLocators
 from locators.login_locators import LoginLocators
 from locators.receive_locators import ReceiveLocators
@@ -112,3 +111,9 @@ class AppManger:
         formatted_chart_no = new_chart_no.zfill(10)
         return formatted_chart_no
             
+    def get_now_time(self):
+        now = datetime.now()
+        am_pm = "오전" if now.hour < 12 else "오후"
+        hour = now.hour if 0 < now.hour <= 12 else (now.hour - 12 if now.hour > 12 else 12)
+        formatted_time = f"{now.strftime('%Y-%m-%d')} {am_pm} {hour}:{now.strftime('%M:%S')}"
+        return formatted_time

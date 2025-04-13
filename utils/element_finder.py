@@ -107,9 +107,9 @@ class ElementFinder:
         return next((item for item in elements if item.element_info.control_type == "Text"
                      and item.element_info.name == name), None)
     @staticmethod
-    def find_test_by_name(elements,name):
+    def find_text_with_name_in(elements,name):
         return next((item for item in elements if item.element_info.control_type == "Text"
-                     and item.element_info.name == name), None)
+                     and name in item.element_info.name), None)
     @staticmethod
     def find_pane_by_auto_id(elements,id):
         return next((item for item in elements if item.element_info.control_type == "Pane"
