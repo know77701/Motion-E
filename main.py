@@ -2,14 +2,15 @@ import ctypes
 import multiprocessing
 import sys
 
-from tests.test_dashboard import *
+from tests.test_chart import *
+from tests.test_dashboard_page import *
 from tests.test_login import *
-from tests.test_side_page import *
 
 if __name__ == "__main__":
     
     # login = TestLogin()
-    side_page = TestSidePage()
+    # test_dash_board = TestDashBoardPage()
+    test_chart = TestChart()
     
     
 

@@ -1,11 +1,12 @@
 import ctypes
 import sys
 import time
-
 from pywinauto import Desktop, application
-
-import config
+from datetime import datetime
+from locators.chart_locators import ChartLocators
 from locators.login_locators import LoginLocators
+from locators.receive_locators import ReceiveLocators
+from locators.util_locators import UtilLocators
 from utils.app_screen_shot import window_screen_shot
 
 
@@ -17,38 +18,54 @@ class AppManger:
         self.motion_app = application.Application(backend=self.backend)
         
    
-    def version_search(self, search_title):
-        
+    def version_search(self, search_title=None, auto_id=None):
         """특정 창이 열려있는지 확인"""
-        windows = Desktop(backend=self.backend).windows()
-        try:
-            for window in windows:
-                if search_title in window.window_text():
-                    return window.window_text()
-        except Exception as e:
-            print("버전 찾기 실패", e)
-            window_screen_shot("version_search_fail")
+        if auto_id:
+            windows = Desktop(backend=self.backend).windows()
+            try:
+                for window in windows:
+                    if window.automation_id() == auto_id:
+                        return window.window_text()
+            except Exception as e:
+                print("버전 찾기 실패", e)
             
+        else:
+            windows = Desktop(backend=self.backend).windows()
+            try:
+                for window in windows:
+                    if search_title in window.window_text():
+                        return window.window_text()
+            except Exception as e:
+                print("버전 찾기 실패", e)
+                window_screen_shot("version_search_fail")
                 
     def login_form_connect(self,win32_app):
-        app = win32_app.connect(title=config.PROCESS_TITLE)
+        app = win32_app.connect(title=UtilLocators.PROCESS_TITLE)
         app.top_window().set_focus()
         return app
             
     def motion_app_connect(self, motion_app):
-        version_text = self.version_search(config.MOTION_VERSION_TITLE)
+        version_text = self.version_search(UtilLocators.MOTION_VERSION_TITLE, auto_id=None)
         app = motion_app.connect(title=version_text)
         app.top_window().set_focus()
         return app
-            
+    
+    def receive_connect(self):
+        if self.version_search(ReceiveLocators.RECEIVE_POPUP_TITLE, auto_id=None):
+            return self.motion_app_connect(self.motion_app)
+        
+    def chart_connect(self):
+        if self.version_search(search_title=None, auto_id=ChartLocators.CHART_AUTO_ID):
+            return self.motion_app_connect(self.motion_app)
+    
     def app_connect(self, retries=0):
         try:
-            if self.version_search(config.MOTION_VERSION_TITLE):
+            if self.version_search(UtilLocators.MOTION_VERSION_TITLE, auto_id=None):
                 return self.motion_app_connect(self.motion_app)
-            elif self.version_search(LoginLocators.LOGIN_FORM_TITLE):
+            elif self.version_search(LoginLocators.LOGIN_FORM_TITLE, auto_id=None):
                 return self.login_form_connect(self.win32_app)
             else:
-                self.win32_app.start(config.APP_PATH)
+                self.win32_app.start(UtilLocators.APP_PATH)
                 time.sleep(3)
                 motion_window = self.motion_app_connect(self.motion_app)
                 return motion_window
@@ -56,7 +73,7 @@ class AppManger:
         except application.ProcessNotFoundError as e:
             print("앱 찾기 실패 :", e)
             window_screen_shot("app_connect_fail")
-            if retries < config.MAX_RETRY:
+            if retries < 3:
                 retries += 1
                 print(f"재시도 횟수: {retries}")
                 self.app_connect(retries)
@@ -65,9 +82,38 @@ class AppManger:
         except application.AppStartError:
             print("앱 미설치 또는 앱 미존재")
             window_screen_shot("app_connect_fail")
-            
+        
     def check_admin(self):
         if not ctypes.windll.shell32.IsUserAnAdmin():
             ctypes.windll.shell32.ShellExecuteW(
                 None, "runas", sys.executable, ' '.join(sys.argv), None, 1)
             sys.exit()
+            
+    def mobile_number_change_fromat(self, mobile_no):
+        """모바일 번호 형식 맞추기"""
+        mobile_no = mobile_no.strip().replace("-", "")
+        
+        if not mobile_no.isdigit():
+            print("숫자가 아닌 문자가 포함되어 있습니다.")
+            return False
+
+        length = len(mobile_no)
+        if length not in [10, 11]:
+            if length == 8:
+                mobile_no = "010" + mobile_no
+                return mobile_no
+            else:
+                print("입력한 테스트 번호를 다시 확인해주세요")
+        return mobile_no
+    
+    def chart_number_change_format(self, chart_no):
+        new_chart_no = chart_no.strip().replace(" ", "")
+        formatted_chart_no = new_chart_no.zfill(10)
+        return formatted_chart_no
+            
+    def get_now_time(self):
+        now = datetime.now()
+        am_pm = "오전" if now.hour < 12 else "오후"
+        hour = now.hour if 0 < now.hour <= 12 else (now.hour - 12 if now.hour > 12 else 12)
+        formatted_time = f"{now.strftime('%Y-%m-%d')} {am_pm} {hour}:{now.strftime('%M:%S')}"
+        return formatted_time

@@ -1,6 +1,5 @@
 from pywinauto import findwindows, keyboard, mouse
 
-import config
 from locators.login_locators import LoginLocators
 from pages.base_page import *
 from utils.app_screen_shot import window_screen_shot
