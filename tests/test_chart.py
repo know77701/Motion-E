@@ -1,3 +1,5 @@
+import pyautogui
+
 from pages.chart_page import ChartPage
 from utils.app_manager import AppManger
 from utils.element_finder import ElementFinder
@@ -9,14 +11,13 @@ class TestChart:
         self.chart_page = ChartPage()
         self.create_time = None
         self.craete_memo_content = None
-        self.side_chart_info_compare()
+        self.compare_chart_user_info()
         # self.side_memo_creat()
         
     
     def compare_chart_user_info(self):
-        chart_no = self.app.chart_number_change_format("4591")
-        if not self.chart_page.compare_user_info_get_data(chart_no):
-            print("진입한 차트의 환자 정보를 확인해주세요")
+        chart_no = self.app.chart_number_change_format("2351")
+        assert self.chart_page.compare_user_info_get_data(chart_no), pyautogui.alert('환자의 차트 정보를 확인하세요')
     
     def side_memo_creat(self):
         """메모 저장"""
@@ -38,4 +39,5 @@ class TestChart:
     
     def side_chart_info_compare(self):
         compare_result = self.chart_page.get_side_chart()
+        # self.get_comfirm_popup()
         return

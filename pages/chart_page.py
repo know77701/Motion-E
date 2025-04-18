@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from utils.app_manager import AppManger
 from utils.element_finder import ElementFinder
 
@@ -114,11 +115,30 @@ class ChartPage:
 
     def get_side_chart(self):
         panel_list = self.get_chart_field("side_chart")
-        
         for item_list in panel_list:
             if ElementFinder.find_link_by_name(item_list.children() ,"차트"):
                 buttons = ElementFinder.find_buttons(item_list.children())
                 chart_button = buttons[1] if len(buttons) > 1 else None
                 chart_button.click()
                 break
-            
+        
+
+    def get_comfirm_popup(self):
+        panel_list = self.get_chart_field("side_chart")
+        for item_list in panel_list:
+            custom_popup = ElementFinder.find_custom(item_list.children())
+            if custom_popup:
+                break
+                
+        for items in custom_popup.children():
+            print(items.children())
+            btn = ElementFinder.find_button_by_name(items.children(), "예")
+            if btn:
+                break
+
+        if btn:
+            btn.click
+            return True
+        return False
+    
+        
