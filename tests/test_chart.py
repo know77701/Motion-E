@@ -17,7 +17,7 @@ class TestChart:
     
     def compare_chart_user_info(self):
         chart_no = self.app.chart_number_change_format("2351")
-        assert self.chart_page.compare_user_info_get_data(chart_no), pyautogui.alert('환자의 차트 정보를 확인하세요')
+        assert self.chart_page.compare_user_info_get_data(chart_no), self.app.assert_alert("환자 정보를 확인해주세요")
     
     def side_memo_creat(self):
         """메모 저장"""
@@ -34,10 +34,13 @@ class TestChart:
         
         self.create_time = self.app.get_now_time()
         compare_result = self.chart_page.compare_side_memo(self.craete_memo_content,self.create_time)
-        if not compare_result:
-            print("작성된 메모가 존재하지 않습니다.")
+        assert compare_result, self.app.assert_alert("작성된 메모가 존재하지 않습니다.")
     
-    def side_chart_info_compare(self):
+    def change_side_chart(self):
         compare_result = self.chart_page.get_side_chart()
-        # self.get_comfirm_popup()
+        assert self.chart_page.get_comfirm_popup(), self.app.assert_alert("사이드 차트를 진입할 수 없습니다.")
         return
+
+    def reservation_tab(self):
+        return
+    

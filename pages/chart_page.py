@@ -135,7 +135,6 @@ class ChartPage:
             btn = ElementFinder.find_button_by_name(items.children(), "예")
             if btn:
                 break
-
         if btn:
             btn.click
             return True
