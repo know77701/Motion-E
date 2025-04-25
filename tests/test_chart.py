@@ -11,7 +11,7 @@ class TestChart:
         self.chart_page = ChartPage()
         self.create_time = None
         self.craete_memo_content = None
-        self.compare_chart_user_info()
+        self.reservation_tab()
         # self.side_memo_creat()
         
     
@@ -34,7 +34,7 @@ class TestChart:
         
         self.create_time = self.app.get_now_time()
         compare_result = self.chart_page.compare_side_memo(self.craete_memo_content,self.create_time)
-        assert compare_result, self.app.assert_alert("작성된 메모가 존재하지 않습니다.")
+        assert compare_result, self.app.assert_alert("작성된 메모가 존재하지 않습니다.") 
     
     def change_side_chart(self):
         compare_result = self.chart_page.get_side_chart()
@@ -42,5 +42,5 @@ class TestChart:
         return
 
     def reservation_tab(self):
-        return
-    
+        return_list = self.chart_page.get_reservation_tab_element_list()
+        
