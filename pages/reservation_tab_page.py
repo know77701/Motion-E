@@ -33,9 +33,8 @@ class ReservationTab:
     def get_rsrv_edits(self):
         """예약탭 Edit 리스트 반환"""
         edit_arr = []
-        print(self.get_rsrv_panel_items())
         for pane in self.get_rsrv_panel_items():
-            edit_arr.append(self.element_finder.find_edit(pane.children()))
+            edit_arr.append(self.element_finder.find_edits(pane.children()))
         return edit_arr
 
     def get_rsrv_comboboxes(self):
@@ -47,13 +46,32 @@ class ReservationTab:
     
     def get_rsrv_list_table(self, auto_id):
         """예약탭 테이블 리스트 반환"""
+        table_arr = []
         list_items = self.get_reservation_tab_element_list()
         for items in list_items:
             table_items = self.element_finder.find_tables(items.children())
             if table_items:
-                for item in table_items:
-                    if item.element_info.automation_id  == auto_id:
-                        return item
+                table_arr.extend(table_items)
+
+        return self.element_finder.find_list_items_by_auto_id(table_arr, auto_id)
+    
+    def get_forward_memo_edit(self):
+        return self.get_rsrv_edits()[0]
+    
+    def get_rsrv_memo_edit(self):
+        return self.get_rsrv_edits()[1]
+    
+    def get_rsrv_day_edit(self):
+        return self.get_rsrv_edits()[2]
+
+    def get_rsrv_time_edit(self):
+        return self.get_rsrv_edits()[3]
+    
+    def get_rsrv_status_edit(self):
+        return self.get_rsrv_edits()[4]
+
+    def get_forward_memo_edit(self):
+        return self.get_rsrv_edits()[0]
     
     def get_calendar_button(self):
         return self.get_rsrv_buttons()[0]
@@ -61,10 +79,10 @@ class ReservationTab:
     def get_today_button(self):
         return self.get_rsrv_buttons()[1]
 
-    def get_change_reservation_button(self):
+    def get_change_rsrv_button(self):
         return self.get_rsrv_buttons()[2]
 
-    def get_new_reservation_button(self):
+    def get_new_rsrv_button(self):
         return self.get_rsrv_buttons()[3]
     
     

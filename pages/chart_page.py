@@ -33,7 +33,6 @@ class ChartPage:
         else:
             return None
         
-        
     def compare_user_info_get_data(self,chart_no):
         """차트 진입 데이터 확인"""
         user_info_field = self.get_chart_field("user_info")

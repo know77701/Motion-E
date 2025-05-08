@@ -47,6 +47,13 @@ class TestChart:
         assert self.side_chart.get_comfirm_popup(), self.app.assert_alert("사이드 차트를 진입할 수 없습니다.")
         
     def test_reservation_tab(self):
+        test = self.reservation_tab.get_rsrv_timetable()
+        print(f"test: {test}")
+        test = self.reservation_tab.get_rsrv_list()
+        print(f"test: {test}")
+        test = self.reservation_tab.get_ticket_list()
+        print(f"test: {test}")
+        
         rsrv_edit_list = self.reservation_tab.get_rsrv_edits()
     
     def create_reservation(self):

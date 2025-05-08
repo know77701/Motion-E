@@ -102,10 +102,6 @@ class ElementFinder:
                     and item.element_info.automation_id == automation_id),None)
 
     @staticmethod
-    def find_edit(elements):
-        return [item for item in elements if item.element_info.control_type == "Edit"]
-
-    @staticmethod
     def find_documents(elements):
         return [item for item in elements if item.element_info.control_type == "Document"]
     
@@ -174,3 +170,7 @@ class ElementFinder:
     @staticmethod
     def find_combobox(elements):
         return [item for item in elements if item.element_info.control_type == "ComboBox"]
+    
+    @staticmethod
+    def find_list_items_by_auto_id(elements, auto_id):
+        return next((item for item in elements if item.element_info.automation_id == auto_id), None)
