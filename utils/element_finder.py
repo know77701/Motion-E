@@ -27,6 +27,21 @@ class ElementFinder:
             
         return result
     
+    def recursive_children_with_control_type(self,element, find_element,depth, max_depth):
+        """지정한 깊이까지 모든 하위 자식 노드 재귀 순회"""
+        result = []
+        if depth > max_depth:
+            return result
+
+        for child in  element.children():
+            ctrl_type = child.element_info.control_type
+            if ctrl_type == find_element:
+                result.append(child)
+                
+            result.extend(self.recursive_children_with_control_type(child, find_element ,depth + 1, max_depth))
+            
+        return result
+    
     def recursive_children(self, element, depth, max_depth):
         result = []
         if depth > max_depth:
@@ -73,6 +88,10 @@ class ElementFinder:
     def find_button_by_name(elements, name):
         return next((item for item in elements if item.element_info.control_type == "Button" 
                     and item.element_info.name == name),None)
+    @staticmethod
+    def find_button_by_auto_id(elements, auto_id):
+        return next((item for item in elements if item.element_info.control_type == "Button" 
+                    and item.element_info.automation_id == auto_id),None)
     @staticmethod
     def find_lists(elements):
         return [item for item in elements if item.element_info.control_type == "List"]
@@ -147,3 +166,11 @@ class ElementFinder:
     @staticmethod
     def find_tables(elements):
         return [item for item in elements if item.element_info.control_type == "Table"]
+    
+    @staticmethod
+    def find_combobox(elements):
+        return [item for item in elements if item.element_info.control_type == "ComboBox"]
+    
+    @staticmethod
+    def find_list_items_by_auto_id(elements, auto_id):
+        return next((item for item in elements if item.element_info.automation_id == auto_id), None)
