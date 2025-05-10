@@ -81,8 +81,8 @@ Motion-E/
 ├── package.json
 └── requirements.txt
 ```
-dto/: 데이터 전송 객체(Data Transfer Objects)를 정의
-locators/: 요소의 위치를 지정하는 로케이터
-pages/: 페이지 객체 모델(POM, Page Object Model)을 따르며, UI 테스트 시 실제 페이지의 동작을 추상화
-tests/: 테스트 케이스를 포함하며, 각 기능에 대한 검증을 수행
-utils/: 유틸리티 함수 및 공통 모듈을 포함
+- dto/: 데이터 전송 객체(Data Transfer Objects)를 정의
+- locators/: 요소의 위치를 지정하는 로케이터
+- pages/: 페이지 객체 모델(POM, Page Object Model)을 따르며, UI 테스트 시 실제 페이지의 동작을 추상화
+- tests/: 테스트 케이스를 포함하며, 각 기능에 대한 검증을 수행
+- utils/: 유틸리티 함수 및 공통 모듈을 포함
