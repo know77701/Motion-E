@@ -1,8 +1,11 @@
 import ctypes
 import sys
 import time
-from pywinauto import Desktop, application
 from datetime import datetime
+
+import pyautogui
+from pywinauto import Desktop, application
+
 from locators.chart_locators import ChartLocators
 from locators.login_locators import LoginLocators
 from locators.receive_locators import ReceiveLocators
@@ -117,3 +120,6 @@ class AppManger:
         hour = now.hour if 0 < now.hour <= 12 else (now.hour - 12 if now.hour > 12 else 12)
         formatted_time = f"{now.strftime('%Y-%m-%d')} {am_pm} {hour}:{now.strftime('%M:%S')}"
         return formatted_time
+    
+    def assert_alert(self, alert_text):
+        return pyautogui.alert(alert_text)
