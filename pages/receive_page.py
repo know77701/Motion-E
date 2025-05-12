@@ -7,9 +7,9 @@ from utils.element_finder import ElementFinder
 
 
 class ReceivePage:
-    def __init__(self):
-        app = AppManger()
-        app_title = app.version_search(ReceiveLocators.RECEIVE_POPUP_TITLE)
+    def __init__(self, app_manger: AppManger):
+        self.app_manger = app_manger
+        app_title = self.app_manger.version_search(ReceiveLocators.RECEIVE_POPUP_TITLE)
         self.side_window = Desktop(backend="uia").window(title=app_title).wrapper_object()
     
     def get_popup_object(self, find_name):
@@ -48,11 +48,10 @@ class ReceivePage:
         window_list = self.side_window.children()
         elements = [child for element in window_list for child in element.children()]
         edit_arr = []
-        for i in elements:
-            if i.element_info.control_type == "Pane":
-                for el in i.children():
-                    if el.element_info.control_type == "Edit" and el.element_info.automation_id != "txtAcpt_Dd":
-                        edit_arr.append(el)
+        pane_list = ElementFinder.find_pane(elements)
+        for el in pane_list.children():
+            if el.element_info.control_type == "Edit" and el.element_info.automation_id != "txtAcpt_Dd":
+                edit_arr.append(el)
         return edit_arr
 
     def write_receive_memo(self, user_memo, receive_memo):
@@ -63,8 +62,10 @@ class ReceivePage:
     
     def submit_receive(self):
         btn_list = self.get_popup_object("get_receive_btn")
-        for btn in btn_list:
-            if btn.element_info.name == "접수":
-                btn.click()
-                break
+        submit_btn = ElementFinder.find_button_by_name(btn_list, "접수")
+        if submit_btn:
+            ElementFinder.click(submit_btn)
+        else:
+            raise "버튼찾기 실패"
+            
     

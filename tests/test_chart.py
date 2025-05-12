@@ -15,9 +15,9 @@ class TestChart:
         self.create_time = None
         self.craete_memo_content = None
         
-        # self.test_compare_chart_user_info()
-        # self.test_side_memo_creat()
-        # self.test_change_side_chart()
+        self.test_compare_chart_user_info()
+        self.test_side_memo_creat()
+        self.test_change_side_chart()
         self.test_reservation_tab()
         
     

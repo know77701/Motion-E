@@ -3,13 +3,15 @@ import time
 
 from utils.app_manager import AppManger
 from utils.element_finder import ElementFinder
+from locators.dashboard_locators import DashboardLocators
+
 
 
 class DashBoardPage():
-    def __init__(self):
-        self.finder = ElementFinder()
+    def __init__(self, app_manger: AppManger):
+        self.app_manger = app_manger
+        self.app_title = self.app_manger.version_search(DashboardLocators.MAIN_FORM_TITLE)
         
-    
     def find_field(self, find_name):
         name_map = {
             "예약": "부도",
@@ -17,7 +19,7 @@ class DashBoardPage():
             "수납": "완료",
             "시술": "경과시간"
         }
-        parent_field = self.finder.get_chrome_field()
+        parent_field = ElementFinder.get_chrome_field(self.app_title)
         dashboard_field = ElementFinder.find_documents(parent_field.children())
         keyword = name_map.get(find_name, None)
         
@@ -34,8 +36,7 @@ class DashBoardPage():
                 if not keyword and name == find_name:
                     return element_list
                 
-        print("입력된 탭을 찾을 수 없습니다.")
-        return
+        return None
 
     def time_string(self, name):
         return re.match(r"^\d{1,2}:\d{2}$", name) is not None
@@ -44,6 +45,7 @@ class DashBoardPage():
         reservation_list_field = self.find_field(find_name)
         customer_blocks,current_block,end_queue = [],[],[]
         collecting = False
+        
         for el in reservation_list_field.children():
             name = el.element_info.name.strip()
             ctrl_type = el.friendly_class_name()
@@ -77,9 +79,11 @@ class DashBoardPage():
         reservation_list_field = self.find_field(find_name)
         
         if reservation_list_field != None:
+            
             for el in reservation_list_field.children():
                 ctrl_type = el.friendly_class_name()
                 auto_id = el.element_info.automation_id
+                
                 if find_name == "예약":
                     if ctrl_type == "ListBox" and auto_id == "rsrv-list":
                         return el
@@ -134,29 +138,28 @@ class DashBoardPage():
 
     def get_cancle_button(self, find_name,chart_no):
         find_user = self.get_field_user_list(find_name, chart_no)
-        for list_items in find_user:
-            for items in list_items.children():
+        cancle_btn = ElementFinder.list_in_find_button(find_user.children())
         
-                if items.element_info.control_type == "Button":
-                    items.click()
+        if cancle_btn:
+            ElementFinder.click(cancle_btn)
     
     def cancle_web_popup_action(self):
-        parent_field = self.finder.get_chrome_field()
+        parent_field = ElementFinder.get_chrome_field(self.app_title)
         custom_element = ElementFinder.find_custom(parent_field.children())
         group_list = ElementFinder.find_group_list(custom_element.children())
         for group_item in group_list:
             cancel_button = ElementFinder.find_button_by_name(group_item.children(), "예")
             if cancel_button:
-                cancel_button.click()
+                ElementFinder.click(cancel_button)
                 return True
         return False
         
     def reservation_cancel(self,chart_no):
         self.get_cancle_button("예약",chart_no)
-
-        parent_field = self.finder.get_chrome_field()
+        parent_field = ElementFinder.get_chrome_field(self.app_title)
         cancel_btn = ElementFinder.find_button_by_name(parent_field.children(), "저장")
-        cancel_btn.click()
+        if cancel_btn:
+            ElementFinder.click(cancel_btn)
         
         self.cancle_web_popup_action()
         

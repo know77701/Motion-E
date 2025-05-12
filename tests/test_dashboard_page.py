@@ -13,80 +13,56 @@ from utils.multi_processing import MultiProcess
 class TestDashBoardPage:
     def __init__(self):
         self.app_manager = AppManger()
+        self.side_page = SidePage(self.app_manager)
+        self.user_save_page = UserSavePage(self.app_manager)
+        self.dashboard_page = DashBoardPage()
+        self.receive_page = ReceivePage(self.app_manager)
         self.app_manager.check_admin()
         
-        self.window = self.app_manager.app_connect(retries=0)
-        self.side_page = SidePage()
-        self.user_save_page = UserSavePage()
+        self.window = self.app_manager.motion_app_connect(retries=0)
+        
         self.create_time = None
         self.notice_content = "공지사항 테스트"
         self.update_content = "업데이트"
+        
         self.user_dto = UserDTO(chart_no=None,name="소말리QA", mobile_no="010-7441-7631",jno=None)
-        self.dashboard_page = DashBoardPage()
-        self.receive_page = ReceivePage()
-        # self.test_create_notice()
-        # self.test_update_notice()
-        # self.test_delete_notice()
-        self.test_open_chart()
+        
+        self.test_create_notice()
+        self.test_update_notice()
+        self.test_delete_notice()
+        # self.test_open_chart()
         # self.test_save_user()
         # self.test_reseve_user()
-        
-        # self.start_sub_process_event = multiprocessing.Event()
-        # self.sub_process_done_event = multiprocessing.Event()
-        # self.test()
-
-    def test_open_chart(self):
-        print("차트 진입 테스트 시작")
-        self.user_dto.chart_no = "0000002351"
-        self.dashboard_page.open_chart(self.user_dto.chart_no)
     
     def test_create_notice(self):
-        print("공지사항 생성 시작")
-        start_time = time.perf_counter()
         self.create_time = self.side_page.save_notice(self.notice_content)
-        if not self.side_page.compare_notice(notice_content=self.notice_content, compare_time=self.create_time):
-            print("공지사항이 등록되지 않았습니다.")
-        end_time = time.perf_counter()
-        execution_time = end_time - start_time
-        print(f"Function executed in: {execution_time:.4f} seconds")
-        print("공지사항 생성 종료")
+        assert not self.side_page.compare_notice(notice_content=self.notice_content, compare_time=self.create_time), "test_create_notice, 공지사항이 등록되지 않았습니다."
         
     def test_update_notice(self):
-        print("공지사항 업데이트 시작")
         self.side_page.update_notice(notice_content=self.notice_content, 
                                       create_time=self.create_time, 
                                       update_content=self.update_content)
-        if not self.side_page.compare_notice(notice_content=self.update_content, compare_time=self.create_time):
-            print("공지사항이 업데이트되지 않았습니다.")
-        print("공지사항 업데이트 종료")
+        assert not self.side_page.compare_notice(notice_content=self.update_content, compare_time=self.create_time), "test_update_notice, 공지사항 업데이트 실패"
     
     def test_delete_notice(self):
-        print("공지사항 삭제 시작")
         self.side_page.delete_notice(notice_content=self.notice_content, create_time=self.create_time)
-        if self.side_page.compare_notice(notice_content=self.notice_content, compare_time=self.create_time):
-            print("공지사항이 삭제되지 않았습니다.")
-        print("공지사항 삭제 종료")
+        assert self.side_page.compare_notice(notice_content=self.notice_content, compare_time=self.create_time), "test_delete_notice, 공지사항 삭제 실패"
     
     def test_save_user(self):
-        print("유저 저장 시작")
         self.side_page.search_user(self.user_dto.name)
         self.side_page.save_user_popup()
         self.user_save_page.user_info_write(self.user_dto)
         self.user_save_page.user_save_and_proceed("저장")
-        print("유저 저장 종료")
     
     def test_reseve_user(self):
-        print("유저 예약 시작")
         user_dto = UserDTO(chart_no="0000002351",name="소말리", mobile_no="010-7441-7631",jno=None)
         self.side_page.search_user(user_dto.chart_no)
         if self.side_page.compare_search_user(user_dto):
             print("검색된 유저가 존재하지 않습니다.")
         self.side_page.search_user_reserve(user_dto)
         self.side_page.reserve_user(user_dto)
-        print("유저 예약 종료")
 
     def test_receive_user(self):
-        print("유저 접수 시작")
         user_dto = UserDTO(chart_no="0000002351", name="소말리", mobile_no="010-7441-7631", jno=None)
         self.side_page.search_user(user_dto.chart_no)
         if self.side_page.compare_search_user(user_dto):
@@ -99,17 +75,18 @@ class TestDashBoardPage:
     
     def test_reservation(self):
         self.dashboard_page.reservation_cancel(self.user_dto.chart_no)
-        if self.dashboard_page.get_reservation_list(self.user_dto.chart_no):
-            print("예약 취소가 되지않았습니다.")
+        assert self.dashboard_page.get_reservation_list(self.user_dto.chart_no),"예약 취소가 되지않았습니다."
    
     def test_reception(self):
         self.dashboard_page.reception_cancel(self.user_dto.chart_no)
-        if self.dashboard_page.get_reception_list(self.user_dto.chart_no):
-            print("접수 취소가 되지않았습니다.")
+        assert self.dashboard_page.get_reception_list(self.user_dto.chart_no),"접수 취소가 되지않았습니다."
 
     def test_reserve_user_reception(self):
         self.dashboard_page.get_reception_list(self.user_dto.chart_no)
     
+    def test_open_chart(self):
+        self.user_dto.chart_no = "0000002351"
+        assert self.dashboard_page.open_chart(self.user_dto.chart_no), "test_open_chart, 환자 차트 열기 실패"
     
 if __name__ == "__main__": 
     test = TestDashBoardPage()

@@ -9,14 +9,14 @@ from utils.element_finder import ElementFinder
 
 
 class UserSavePage():
-    def __init__(self):
-        app = AppManger()
-        app_title = app.version_search(DashboardLocators.MAIN_FORM_TITLE)
-        self.side_window = Desktop(backend="uia").window(title=app_title)
+    def __init__(self, app_manger = AppManger):
+        self.app_manger = app_manger
 
     def get_save_user_field(self):
         """고객 등록 팝업 가져오기"""
-        popup_field = self.side_window.child_window(title="고객등록", auto_id="FrmRegPatInfo", control_type="Window").wrapper_object()
+        app_title = self.app_manger.version_search(DashboardLocators.MAIN_FORM_TITLE)
+        side_window = Desktop(backend="uia").window(title=app_title)
+        popup_field = ElementFinder.find_element(side_window, title="고객등록", auto_id="FrmRegPatInfo",control_type="Window")
         return popup_field.children()[0]
     
     def get_popup_button_field(self, find_name):
@@ -51,9 +51,11 @@ class UserSavePage():
         name = userDto.name
         jno = userDto.jno
         mobile_no = userDto.mobile_no
+        
         edit_list[1].set_text(name)
         edit_list[2][0].set_text(jno[0:6])
         edit_list[2][1].set_text(jno[7:14])
+        
         if len(mobile_no) == 13:
             edit_list[3][0].set_text(mobile_no[0:3])
             edit_list[3][1].set_text(mobile_no[4:7])
@@ -76,4 +78,5 @@ class UserSavePage():
         else:
             save_button = self.get_popup_button_field("저장")
 
-        save_button.click()
+        if save_button:
+            ElementFinder.click(save_button)

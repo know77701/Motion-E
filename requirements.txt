@@ -1,4 +1,4 @@
 pywinauto 
 pyautogui 
-pillow 
-pyscreeze
+functools
+PIL
