@@ -110,10 +110,13 @@ class AppManger:
         return mobile_no
     
     def chart_number_change_format(self, chart_no):
-        new_chart_no = chart_no.strip().replace(" ", "")
-        formatted_chart_no = new_chart_no.zfill(10)
-        return formatted_chart_no
-            
+        try:
+            new_chart_no = chart_no.strip().replace(" ", "")
+            formatted_chart_no = new_chart_no.zfill(10)
+            return formatted_chart_no
+        except Exception as e:
+            print(e)
+                
     def get_now_time(self):
         now = datetime.now()
         am_pm = "오전" if now.hour < 12 else "오후"
