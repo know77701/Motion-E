@@ -42,17 +42,26 @@ class AppManger:
                 print("버전 찾기 실패", e)
                 window_screen_shot("version_search_fail")
                 
-    def login_form_connect(self,win32_app):
-        app = win32_app.connect(title=UtilLocators.PROCESS_TITLE)
-        app.top_window().set_focus()
-        return app
+    def login_form_connect(self, retries = 0):
+        if retries <= 3:
+            app = self.win32_app.connect(title=LoginLocators.LOGIN_FORM_TITLE)
             
-    def motion_app_connect(self, motion_app):
-        version_text = self.version_search(UtilLocators.MOTION_VERSION_TITLE, auto_id=None)
-        app = motion_app.connect(title=version_text)
-        app.top_window().set_focus()
-        return app
-    
+            if app:    
+                app.top_window().set_focus()
+                return app
+            else:
+                return self.login_form_connect(retries + 1)
+            
+    def motion_app_connect(self, retries = 0):
+        if retries <= 3:
+            version_text = self.version_search(UtilLocators.MOTION_VERSION_TITLE, auto_id=None)
+            if version_text:
+                app = self.motion_app.connect(title=version_text)
+                app.top_window().set_focus()
+                return app
+            else:
+                return self.motion_app_connect(retries + 1)
+                
     def receive_connect(self):
         if self.version_search(ReceiveLocators.RECEIVE_POPUP_TITLE, auto_id=None):
             return self.motion_app_connect(self.motion_app)
@@ -64,27 +73,25 @@ class AppManger:
     def app_connect(self, retries=0):
         try:
             if self.version_search(UtilLocators.MOTION_VERSION_TITLE, auto_id=None):
-                return self.motion_app_connect(self.motion_app)
+                return self.motion_app_connect()
             elif self.version_search(LoginLocators.LOGIN_FORM_TITLE, auto_id=None):
-                return self.login_form_connect(self.win32_app)
+                return self.login_form_connect()
             else:
                 self.win32_app.start(UtilLocators.APP_PATH)
                 time.sleep(3)
-                motion_window = self.motion_app_connect(self.motion_app)
-                return motion_window
+                return self.login_form_connect()
                 
         except application.ProcessNotFoundError as e:
             print("앱 찾기 실패 :", e)
-            window_screen_shot("app_connect_fail")
             if retries < 3:
                 retries += 1
                 print(f"재시도 횟수: {retries}")
                 self.app_connect(retries)
             else:
+                window_screen_shot("app_connect_fail")
                 print("최대 재시도 횟수에 도달했습니다. 프로그램을 종료합니다.")
         except application.AppStartError:
             print("앱 미설치 또는 앱 미존재")
-            window_screen_shot("app_connect_fail")
         
     def check_admin(self):
         if not ctypes.windll.shell32.IsUserAnAdmin():
@@ -110,10 +117,13 @@ class AppManger:
         return mobile_no
     
     def chart_number_change_format(self, chart_no):
-        new_chart_no = chart_no.strip().replace(" ", "")
-        formatted_chart_no = new_chart_no.zfill(10)
-        return formatted_chart_no
-            
+        try:
+            new_chart_no = chart_no.strip().replace(" ", "")
+            formatted_chart_no = new_chart_no.zfill(10)
+            return formatted_chart_no
+        except Exception as e:
+            print(e)
+                
     def get_now_time(self):
         now = datetime.now()
         am_pm = "오전" if now.hour < 12 else "오후"
@@ -123,3 +133,4 @@ class AppManger:
     
     def assert_alert(self, alert_text):
         return pyautogui.alert(alert_text)
+    

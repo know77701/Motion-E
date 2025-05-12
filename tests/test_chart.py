@@ -15,9 +15,9 @@ class TestChart:
         self.create_time = None
         self.craete_memo_content = None
         
-        # self.test_compare_chart_user_info()
-        # self.test_side_memo_creat()
-        # self.test_change_side_chart()
+        self.test_compare_chart_user_info()
+        self.test_side_memo_creat()
+        self.test_change_side_chart()
         self.test_reservation_tab()
         
     
@@ -48,12 +48,8 @@ class TestChart:
         
     def test_reservation_tab(self):
         test = self.reservation_tab.get_rsrv_timetable()
-        print(f"test: {test}")
         test = self.reservation_tab.get_rsrv_list()
-        print(f"test: {test}")
         test = self.reservation_tab.get_ticket_list()
-        print(f"test: {test}")
-        
         rsrv_edit_list = self.reservation_tab.get_rsrv_edits()
     
     def create_reservation(self):
