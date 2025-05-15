@@ -25,7 +25,7 @@ class SidePage:
         """사이드 영역 객체 찾기"""
         side_field = ElementFinder.get_chrome_field(self.app_title)
         side_list = side_field.children()
-    
+        
         if find_name in ["bookmark_btn", "search_btn", "today_btn"]:
             button_boxes = ElementFinder.find_buttons(side_list)
             if find_name == "bookmark_btn":
@@ -35,32 +35,32 @@ class SidePage:
             if find_name == "today_btn":
                 return ElementFinder.find_button_by_name(side_list, "오늘")
         
-        if find_name in ["doctor_filter_list", "insurance_filter_list"]:
+        elif find_name in ["doctor_filter_list", "insurance_filter_list"]:
             list_boxes = ElementFinder.find_lists(side_list)
             if find_name == "doctor_filter_list":
                 return list_boxes[0]
             if find_name == "insurance_filter_list":
                 return list_boxes[1]
         
-        if find_name == "search_edit":
+        elif find_name == "search_edit":
             return ElementFinder.find_edit_by_automation_id(side_list, "srch-val")
         
-        if find_name in ["notice_group", "reservation_list", "reservation_group", "search-list"]:
+        elif find_name in ["notice_group", "reservation_list", "reservation_group", "search_list"]:
             doc_boxes = ElementFinder.find_documents(side_list)
-            if find_name in ["notice_group", "search-list"]:
+
+            if find_name in ["notice_group", "search_list"]:
                 return doc_boxes[0].children()
-            if find_name == "reservation_list":
+            elif find_name == "reservation_list":
                 return doc_boxes[1].children()
-            if find_name == "reservation_group":
+            elif find_name == "reservation_group":
                 return ElementFinder.find_documents_by_automation_id(side_list,"reservation")
     
-        if find_name in ["reserve_list"]:
+        elif find_name in ["reserve_list"]:
             return ElementFinder.find_group_by_automation_id(side_list,"scTab")
     
     
     def get_popup_field(self):
         """대시보드 웹 팝업 찾기"""
-        
         side_field = ElementFinder.get_chrome_field(self.app_title )
         return_data = side_field.children()
         custom_wrapper = None
@@ -158,7 +158,8 @@ class SidePage:
         """업데이트 폼 가져오기"""
         return_data = self.get_notice()
         for data_list in return_data:
-            return ElementFinder.find_edit(data_list)
+            if ElementFinder.find_edit(data_list):
+                return data_list
 
     def update_notice(self, notice_content,create_time,update_content):
         """공지사항 수정"""
@@ -168,9 +169,8 @@ class SidePage:
             
             for el in result:
                 item = ElementFinder.find_text_by_name(el, notice_content)
-                
                 if item:
-                    ElementFinder.click(item)
+                    item.click_input()
                     time.sleep(0.5)
                     break
                     
@@ -233,7 +233,7 @@ class SidePage:
     
     def get_search_user_list(self):
         """검색영역 유저리스트 가져오기"""
-        search_user_list = self.side_find_field("search-list")
+        search_user_list = self.side_find_field("search_list")
         list_object = self.get_child_list(search_user_list)
         return list_object
 
@@ -260,7 +260,6 @@ class SidePage:
     def compare_search_user(self,UserDTO : UserDTO):
         """검색 환자 리턴"""
         user_list = self.get_search_user_list()
-        
         if UserDTO.name is not None or UserDTO.chart_no is not None:
             compare_user =  self.compare_user_list(user_list, UserDTO)
             if compare_user is []:

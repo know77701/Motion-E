@@ -17,6 +17,7 @@ class UserSavePage():
         app_title = self.app_manger.version_search(DashboardLocators.MAIN_FORM_TITLE)
         side_window = Desktop(backend="uia").window(title=app_title)
         popup_field = ElementFinder.find_element(side_window, title="고객등록", auto_id="FrmRegPatInfo",control_type="Window")
+        popup_field.children()[0].set_focus()
         return popup_field.children()[0]
     
     def get_popup_button_field(self, find_name):
@@ -47,26 +48,36 @@ class UserSavePage():
         """고객등록 유저 정보 입력"""
         edit_list = self.get_popup_edit_field()
         
+        print(edit_list)
+        
         chart_no = edit_list[0].element_info.name
         name = userDto.name
         jno = userDto.jno
         mobile_no = userDto.mobile_no
         
-        edit_list[1].set_text(name)
-        edit_list[2][0].set_text(jno[0:6])
-        edit_list[2][1].set_text(jno[7:14])
-        
-        if len(mobile_no) == 13:
-            edit_list[3][0].set_text(mobile_no[0:3])
-            edit_list[3][1].set_text(mobile_no[4:7])
-            edit_list[3][2].set_text(mobile_no[9:12])
-        elif len(mobile_no) == 11:
-            edit_list[3][0].set_text(mobile_no[0:3])
-            edit_list[3][1].set_text(mobile_no[3:7])
-            edit_list[3][2].set_text(mobile_no[7:11])
-            
         save_user_dto = UserDTO(chart_no=chart_no, name=name, jno=jno, mobile_no=mobile_no)
-        return save_user_dto
+        
+        if name: edit_list[1].set_text(name)
+        
+        if jno: 
+            edit_list[2][0].set_text(jno[0:6])
+            edit_list[2][1].set_text(jno[7:14])
+        
+        if mobile_no:
+            if len(mobile_no) == 13:
+                edit_list[3][0].set_text(mobile_no[0:3])
+                edit_list[3][1].set_text(mobile_no[4:7])
+                edit_list[3][2].set_text(mobile_no[9:12])
+                
+            elif len(mobile_no) == 11:
+                edit_list[3][0].set_text(mobile_no[0:3])
+                edit_list[3][1].set_text(mobile_no[3:7])
+                edit_list[3][2].set_text(mobile_no[7:11])
+        
+        if save_user_dto:
+            return save_user_dto
+        
+        return None
         
     
     def user_save_and_proceed(self, receive=False, reserve=False):
@@ -77,6 +88,6 @@ class UserSavePage():
             save_button = self.get_popup_button_field("저장+예약")
         else:
             save_button = self.get_popup_button_field("저장")
-
+            
         if save_button:
             ElementFinder.click(save_button)
