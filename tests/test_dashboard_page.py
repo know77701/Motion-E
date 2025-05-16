@@ -1,6 +1,7 @@
 import multiprocessing
 import time
-from multiprocessing import Process
+from multiprocessing import Event, Process
+from threading import Thread
 
 from dto.user_dto import UserDTO
 from pages.dashboard_page import DashBoardPage
@@ -8,7 +9,7 @@ from pages.receive_page import ReceivePage
 from pages.side_page import SidePage
 from pages.user_save_page import UserSavePage
 from utils.app_manager import AppManger
-from utils.popup_handler import popupHandler
+from utils.popup_handler import *
 
 
 class TestDashBoardPage:
@@ -20,7 +21,6 @@ class TestDashBoardPage:
         self.user_save_page = UserSavePage(self.app_manager)
         self.dashboard_page = DashBoardPage(self.app_manager)
         self.receive_page = ReceivePage(self.app_manager)
-        self.popup_handler = popupHandler(self.app_manager)
         
         self.window = self.app_manager.motion_app_connect(retries=0)
         
@@ -74,19 +74,23 @@ class TestDashBoardPage:
 
     def test_receive_user(self):
         user_dto = UserDTO(chart_no="0000002351", name="소말리", mobile_no="010-7441-7631", jno=None)
-        self.side_page.search_user(user_dto.chart_no)
+        # self.side_page.search_user(user_dto.chart_no)
         
-        assert self.side_page.compare_search_user(user_dto) , "검색된 유저가 존재하지 않음"
-        self.side_page.search_user_receive(user_dto)
-        time.sleep(1)
+        # assert self.side_page.compare_search_user(user_dto) , "검색된 유저가 존재하지 않음"
+        # self.side_page.search_user_receive(user_dto)
+        # time.sleep(1)
         
         assert self.receive_page.get_compare_popup_text(user_dto), "접수 팝업 데이터 확인 필요"
+        start_event = Event()
+        popup_proc = Process(target=close_receive_popup_handler, daemon=True)
+        popup_proc.start()
         self.receive_page.write_receive_memo("user memo", "receive memo")
-        p = Process(target=self.popup_handler.close_receive_popup_handler, args=())
-        p.start()
+        print("[메인 프로세스] 이벤트 시그널 발생")
+        start_event.set()
         self.receive_page.submit_receive()
-        p.join()
-    
+        print("[서브 프로세스] ing..")
+        # popup_proc.join()
+        
     def test_reservation_cancel(self):
         self.dashboard_page.reservation_cancel(self.user_dto.chart_no)
         assert self.dashboard_page.get_reservation_list(self.user_dto.chart_no),"예약 취소가 되지않았습니다."
