@@ -17,6 +17,8 @@ class UserSavePage():
         app_title = self.app_manger.version_search(DashboardLocators.MAIN_FORM_TITLE)
         side_window = Desktop(backend="uia").window(title=app_title)
         popup_field = ElementFinder.find_element(side_window, title="고객등록", auto_id="FrmRegPatInfo",control_type="Window")
+        
+        time.sleep(1.5)
         popup_field.children()[0].set_focus()
         return popup_field.children()[0]
     
@@ -25,8 +27,9 @@ class UserSavePage():
         pane_list = self.get_save_user_field()
         button_field = pane_list.children()[2]
         if find_name in ["저장", "저장+예약", "저장+접수"]:
-            return ElementFinder.find_button_by_name(button_field.children(), find_name)
-
+            btn = ElementFinder.find_button_by_name(button_field.children(), find_name)
+            return btn
+        
     def get_popup_edit_field(self):
         """고객등록 팝업 input 가져오기"""
         pane_list = self.get_save_user_field()
@@ -48,8 +51,6 @@ class UserSavePage():
         """고객등록 유저 정보 입력"""
         edit_list = self.get_popup_edit_field()
         
-        print(edit_list)
-        
         chart_no = edit_list[0].element_info.name
         name = userDto.name
         jno = userDto.jno
@@ -66,13 +67,13 @@ class UserSavePage():
         if mobile_no:
             if len(mobile_no) == 13:
                 edit_list[3][0].set_text(mobile_no[0:3])
-                edit_list[3][1].set_text(mobile_no[4:7])
-                edit_list[3][2].set_text(mobile_no[9:12])
+                edit_list[3][1].set_text(mobile_no[4:8])
+                edit_list[3][2].set_text(mobile_no[9:13])
                 
             elif len(mobile_no) == 11:
                 edit_list[3][0].set_text(mobile_no[0:3])
-                edit_list[3][1].set_text(mobile_no[3:7])
-                edit_list[3][2].set_text(mobile_no[7:11])
+                edit_list[3][1].set_text(mobile_no[4:8])
+                edit_list[3][2].set_text(mobile_no[9:11])
         
         if save_user_dto:
             return save_user_dto

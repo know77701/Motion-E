@@ -3,24 +3,25 @@ import time
 from multiprocessing import Event, Process
 from threading import Thread
 
+from pywinauto import Application, Desktop
+
 from dto.user_dto import UserDTO
 from pages.dashboard_page import DashBoardPage
 from pages.receive_page import ReceivePage
 from pages.side_page import SidePage
 from pages.user_save_page import UserSavePage
 from utils.app_manager import AppManger
-from utils.popup_handler import *
 
 
 class TestDashBoardPage:
-    def __init__(self):
+    def __init__(self, start_event):
         self.app_manager = AppManger()
         self.app_manager.check_admin()
-        
         self.side_page = SidePage(self.app_manager)
         self.user_save_page = UserSavePage(self.app_manager)
         self.dashboard_page = DashBoardPage(self.app_manager)
         self.receive_page = ReceivePage(self.app_manager)
+        self.start_event = start_event
         
         self.window = self.app_manager.motion_app_connect(retries=0)
         
@@ -33,9 +34,9 @@ class TestDashBoardPage:
         # self.test_create_notice()
         # self.test_update_notice()
         # self.test_delete_notice()
-        # self.test_save_user()
-        # self.test_reseve_user()
-        self.test_receive_user()
+        self.test_save_user()
+        # self.test_reserve_user()
+        # self.test_receive_user()
     
     def test_create_notice(self):
         self.create_time = self.side_page.save_notice(self.notice_content)
@@ -57,13 +58,15 @@ class TestDashBoardPage:
         self.side_page.save_user_popup()
         
         save_user = self.user_save_page.user_info_write(self.user_dto)
-        self.user_save_page.user_save_and_proceed("저장")
+        self.start_event.set()
+        self.user_save_page.user_save_and_proceed()
         
         # 저장 후 유저 검색 확인
         self.side_page.search_user(self.user_dto.name)
         assert self.side_page.compare_search_user(save_user), "저장된 데이터가 존재하지않음."
+        
     
-    def test_reseve_user(self):
+    def test_reserve_user(self):
         user_dto = UserDTO(chart_no="0000002351",name="소말리", mobile_no="010-7441-7631",jno="941111-1111111")
         
         self.side_page.search_user(user_dto.chart_no)
@@ -73,29 +76,28 @@ class TestDashBoardPage:
         self.side_page.reserve_user(user_dto)
 
     def test_receive_user(self):
-        user_dto = UserDTO(chart_no="0000002351", name="소말리", mobile_no="010-7441-7631", jno=None)
-        # self.side_page.search_user(user_dto.chart_no)
+        # user_dto = UserDTO(chart_no="0000002351", name="소말리", mobile_no="010-7441-7631", jno=None)
+        self.side_page.search_user(self.user_dto.chart_no)
         
-        # assert self.side_page.compare_search_user(user_dto) , "검색된 유저가 존재하지 않음"
-        # self.side_page.search_user_receive(user_dto)
-        # time.sleep(1)
+        assert self.side_page.compare_search_user(self.user_dto) , "검색된 유저가 존재하지 않음"
+        self.side_page.search_user_receive(self.user_dto)
+        time.sleep(1)
         
-        assert self.receive_page.get_compare_popup_text(user_dto), "접수 팝업 데이터 확인 필요"
-        start_event = Event()
-        popup_proc = Process(target=close_receive_popup_handler, daemon=True)
-        popup_proc.start()
+        assert self.receive_page.get_compare_popup_text(self.user_dto), "접수 팝업 데이터 확인 필요"
+        
         self.receive_page.write_receive_memo("user memo", "receive memo")
-        print("[메인 프로세스] 이벤트 시그널 발생")
-        start_event.set()
+        self.start_event.set()
         self.receive_page.submit_receive()
-        print("[서브 프로세스] ing..")
-        # popup_proc.join()
-        
-    def test_reservation_cancel(self):
+    
+        time.sleep(3)
+        self.start_event.set()
+    
+    
+    def test_reserve_cancel(self):
         self.dashboard_page.reservation_cancel(self.user_dto.chart_no)
         assert self.dashboard_page.get_reservation_list(self.user_dto.chart_no),"예약 취소가 되지않았습니다."
    
-    def test_reception_cancel(self):
+    def test_receive_cancel(self):
         self.dashboard_page.reception_cancel(self.user_dto.chart_no)
         assert self.dashboard_page.get_reception_list(self.user_dto.chart_no),"접수 취소가 되지않았습니다."
 
@@ -106,5 +108,3 @@ class TestDashBoardPage:
         self.user_dto.chart_no = "0000002351"
         assert self.dashboard_page.open_chart(self.user_dto.chart_no), "test_open_chart, 환자 차트 열기 실패"
     
-if __name__ == "__main__": 
-    test = TestDashBoardPage()
