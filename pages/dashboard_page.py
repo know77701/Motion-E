@@ -1,10 +1,9 @@
 import re
 import time
 
+from locators.dashboard_locators import DashboardLocators
 from utils.app_manager import AppManger
 from utils.element_finder import ElementFinder
-from locators.dashboard_locators import DashboardLocators
-
 
 
 class DashBoardPage():
@@ -138,8 +137,7 @@ class DashBoardPage():
 
     def get_cancle_button(self, find_name,chart_no):
         find_user = self.get_field_user_list(find_name, chart_no)
-        cancle_btn = ElementFinder.list_in_find_button(find_user.children())
-        
+        cancle_btn = ElementFinder.list_in_find_button(find_user)
         if cancle_btn:
             ElementFinder.click(cancle_btn)
     
@@ -153,15 +151,12 @@ class DashBoardPage():
                 ElementFinder.click(cancel_button)
                 return True
         return False
-        
-    def reservation_cancel(self,chart_no):
-        self.get_cancle_button("예약",chart_no)
+    
+    def reservation_cancel_popup_control(self):
         parent_field = ElementFinder.get_chrome_field(self.app_title)
         cancel_btn = ElementFinder.find_button_by_name(parent_field.children(), "저장")
         if cancel_btn:
             ElementFinder.click(cancel_btn)
-        
-        self.cancle_web_popup_action()
         
     def reception_cancel(self, chart_no):
         self.get_cancle_button("접수",chart_no)

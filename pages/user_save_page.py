@@ -1,4 +1,5 @@
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 from pywinauto import Desktop
 
@@ -29,57 +30,73 @@ class UserSavePage():
         if find_name in ["저장", "저장+예약", "저장+접수"]:
             btn = ElementFinder.find_button_by_name(button_field.children(), find_name)
             return btn
-        
+    
+    def get_chart_fields(self, pane_field):
+        return ElementFinder.find_edits_by_automation_id(pane_field.children(), ["TxtChartNo", "TxtPatNm"])
+
+    def get_jno_fields(self, pane_field):
+        return ElementFinder.find_edits_by_automation_id(pane_field.children(), ["TxtPatJno1", "TxtPatJno2"])
+
+    def get_mobile_fields(self, pane_field):
+        return ElementFinder.find_edits_by_automation_id(pane_field.children(), ["TxtMobileNo1", "TxtMobileNo2", "TxtMobileNo3"])
+
     def get_popup_edit_field(self):
-        """고객등록 팝업 input 가져오기"""
-        pane_list = self.get_save_user_field()
-        pane_field = pane_list.children()[0]
+        pane_field = self.get_save_user_field().children()[0]
+        with ThreadPoolExecutor() as executor:
+            future_chart = executor.submit(self.get_chart_fields, pane_field)
+            future_jno = executor.submit(self.get_jno_fields, pane_field)
+            future_mobile = executor.submit(self.get_mobile_fields, pane_field)
 
-        edit_fields = ["TxtChartNo", "TxtPatNm"]
-        jno_fields = ["TxtPatJno1", "TxtPatJno2"]
-        mobile_fields = ["TxtMobileNo1", "TxtMobileNo2", "TxtMobileNo3"]
+            chart_fields = future_chart.result()
+            jno_fields = future_jno.result()
+            mobile_fields = future_mobile.result()
 
-        edit_arr = [ElementFinder.find_edit_by_automation_id(pane_field.children(), field) for field in edit_fields]
-        jno_arr = [ElementFinder.find_edit_by_automation_id(pane_field.children(), field) for field in jno_fields]
-        mobile_number_arr = [ElementFinder.find_edit_by_automation_id(pane_field.children(), field) for field in mobile_fields]
+        edit_list = []
+        edit_list.extend(chart_fields)
+        edit_list.extend(jno_fields)
+        edit_list.extend(mobile_fields)
+        return edit_list
+    
+    def input_name_info(self, edit_list, name):
+        if name:
+            ElementFinder.input_text(edit_list[1], name)
+        else:
+            assert False, "환자이름이 입력되지 않았습니다."
 
-        edit_arr.append(jno_arr)
-        edit_arr.append(mobile_number_arr)
-        return edit_arr
+    def input_jno_info(self, edit_list, jno):
+        if jno:
+            ElementFinder.input_text(edit_list[2], jno[0:6])
+            ElementFinder.input_text(edit_list[3], jno[7:14])
+        else:
+            assert False, "환자 주민번호가 입력되지않았습니다."
 
-    def user_info_write(self, userDto : UserDTO):
-        """고객등록 유저 정보 입력"""
-        edit_list = self.get_popup_edit_field()
-        
-        chart_no = edit_list[0].element_info.name
-        name = userDto.name
-        jno = userDto.jno
-        mobile_no = userDto.mobile_no
-        
-        save_user_dto = UserDTO(chart_no=chart_no, name=name, jno=jno, mobile_no=mobile_no)
-        
-        if name: edit_list[1].set_text(name)
-        
-        if jno: 
-            edit_list[2][0].set_text(jno[0:6])
-            edit_list[2][1].set_text(jno[7:14])
-        
+    def input_mobile_info(self, edit_list, mobile_no):
         if mobile_no:
             if len(mobile_no) == 13:
-                edit_list[3][0].set_text(mobile_no[0:3])
-                edit_list[3][1].set_text(mobile_no[4:8])
-                edit_list[3][2].set_text(mobile_no[9:13])
-                
+                ElementFinder.input_text(edit_list[4], mobile_no[0:3])
+                ElementFinder.input_text(edit_list[5], mobile_no[4:8])
+                ElementFinder.input_text(edit_list[6], mobile_no[9:13])
             elif len(mobile_no) == 11:
-                edit_list[3][0].set_text(mobile_no[0:3])
-                edit_list[3][1].set_text(mobile_no[4:8])
-                edit_list[3][2].set_text(mobile_no[9:11])
-        
-        if save_user_dto:
-            return save_user_dto
-        
-        return None
-        
+                ElementFinder.input_text(edit_list[4], mobile_no[0:3])
+                ElementFinder.input_text(edit_list[5], mobile_no[4:7])
+                ElementFinder.input_text(edit_list[6], mobile_no[7:11])
+        else:
+            assert False, "환자 핸드폰번호가 입력되지 않았습니다."
+    
+    def user_info_write(self, userDto: UserDTO):
+        edit_list = self.get_popup_edit_field()
+
+        chart_no = edit_list[0].element_info.name
+        self.input_name_info(edit_list, userDto.name)
+        self.input_jno_info(edit_list, userDto.jno)
+        self.input_mobile_info(edit_list, userDto.mobile_no)
+
+        return UserDTO(
+            chart_no=chart_no,
+            name=userDto.name,
+            jno=userDto.jno,
+            mobile_no=userDto.mobile_no
+        )
     
     def user_save_and_proceed(self, receive=False, reserve=False):
         """고객등록 저장"""

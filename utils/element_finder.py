@@ -89,17 +89,17 @@ class ElementFinder:
  
     @staticmethod
     def list_in_find_button(elements):
-        return (element for item in elements for element in item.children()
-                if element.element_info.control_type == "Button")
+        return next((element for item in elements for element in item.children()
+                if element.element_info.control_type == "Button"), None)
 
     @staticmethod
     def find_button_by_name(elements, name):
         return next((item for item in elements if item.element_info.control_type == "Button" 
                     and item.element_info.name == name),None)
     @staticmethod
-    def find_button_by_auto_id(elements, auto_id):
+    def find_button_by_auto_id(elements, automation_id):
         return next((item for item in elements if item.element_info.control_type == "Button" 
-                    and item.element_info.automation_id == auto_id),None)
+                    and item.element_info.automation_id == automation_id),None)
     @staticmethod
     def find_lists(elements):
         return [item for item in elements if item.element_info.control_type == "List"]
@@ -107,7 +107,13 @@ class ElementFinder:
     @staticmethod
     def find_edit_by_automation_id(elements, automation_id):
         return next((item for item in elements if item.element_info.control_type == "Edit" 
-                    and item.element_info.automation_id == automation_id),None)
+                    and item.element_info.automation_id in automation_id),None)
+    
+    @staticmethod
+    def find_edits_by_automation_id(elements, automation_ids: list):
+        return [item for item in elements 
+                if item.element_info.control_type == "Edit" 
+                and item.element_info.automation_id in automation_ids]
 
     @staticmethod
     def find_edits_by_not_automation_id(elements, automation_id):
@@ -208,4 +214,5 @@ class ElementFinder:
             element.set_text(text)
         else:
             raise Exception(f"입력할 수 없음: {element}")
-        
+    
+    

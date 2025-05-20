@@ -3,15 +3,16 @@ import pyautogui
 from pages.chart_page import ChartPage
 from pages.reservation_tab_page import ReservationTab
 from pages.side_chart_page import SideChart
-from utils.app_manager import AppManger
+from tests.test_base import TestBase
 
 
-class TestChart:
+class TestChart(TestBase):
     def __init__(self):
-        self.app = AppManger()
-        self.chart_page = ChartPage()
-        self.side_chart = SideChart()
-        self.reservation_tab = ReservationTab()
+        super.__init__()
+        
+        self.chart_page = ChartPage(self.app_manager)
+        self.side_chart = SideChart(self.app_manager)
+        self.reservation_tab = ReservationTab(self.app_manager)
         self.create_time = None
         self.craete_memo_content = None
         
@@ -22,8 +23,8 @@ class TestChart:
         
     
     def test_compare_chart_user_info(self):
-        chart_no = self.app.chart_number_change_format("4650")
-        assert self.chart_page.compare_user_info_get_data(chart_no), self.app.assert_alert("환자 정보를 확인해주세요")
+        chart_no = self.app_manager.chart_number_change_format("4650")
+        assert self.chart_page.compare_user_info_get_data(chart_no), self.app_manager.assert_alert("환자 정보를 확인해주세요")
     
     def test_side_memo_creat(self):
         """메모 저장"""
@@ -38,13 +39,13 @@ class TestChart:
         save_btn = self.side_chart.get_side_memo_button()
         save_btn.click()
         
-        self.create_time = self.app.get_now_time()
+        self.create_time = self.app_manager.get_now_time()
         compare_result = self.side_chart.compare_side_memo(self.craete_memo_content,self.create_time)
-        assert compare_result, self.app.assert_alert("작성된 메모가 존재하지 않습니다.") 
+        assert compare_result, self.app_manager.assert_alert("작성된 메모가 존재하지 않습니다.") 
     
     def test_change_side_chart(self):
         self.side_chart.get_side_chart()
-        assert self.side_chart.get_comfirm_popup(), self.app.assert_alert("사이드 차트를 진입할 수 없습니다.")
+        assert self.side_chart.get_comfirm_popup(), self.app_manager.assert_alert("사이드 차트를 진입할 수 없습니다.")
         
     def test_reservation_tab(self):
         test = self.reservation_tab.get_rsrv_timetable()
