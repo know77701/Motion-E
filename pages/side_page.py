@@ -1,5 +1,6 @@
 import random
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
 from pywinauto import Desktop
@@ -61,19 +62,12 @@ class SidePage:
     
     def get_popup_field(self):
         """대시보드 웹 팝업 찾기"""
-        side_field = ElementFinder.get_chrome_field(self.app_title )
-        return_data = side_field.children()
-        custom_wrapper = None
-        popup_btn_list = []
+        side_field = ElementFinder.get_chrome_field(self.app_title)
+        custom_wrapper = ElementFinder.find_customs(side_field.children())
+        for item in custom_wrapper:
+            group_list = ElementFinder.find_group_list(item.children())
         
-        custom_wrapper = ElementFinder.find_custom(return_data)
-        group_list = ElementFinder.find_group(custom_wrapper.children())
-        
-        for items in group_list.children():
-            if items.element_info.control_type == "Button":
-                popup_btn_list.append(items)
-        return popup_btn_list
-
+        return group_list
 
     def save_notice(self, set_value):
         """공지사항 입력"""
@@ -82,7 +76,7 @@ class SidePage:
             edit_item = ElementFinder.find_edit(notice_group)
             edit_item.set_text("")
             edit_item.set_text(set_value)
-            time.sleep(0.5)
+            time.sleep(1)
             edit_item.set_focus()
             send_keys("{ENTER}")
             return datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
@@ -129,7 +123,7 @@ class SidePage:
             if has_notice_content and has_create_time:
                 filtered_data.append(sub_list)
         return filtered_data
-    
+
 
     def compare_notice(self, notice_content, compare_time):
         """공지사항 비교 확인"""
@@ -185,13 +179,13 @@ class SidePage:
             ElementFinder.click(update_save_btn)
         
     def delete_notice(self, notice_content,create_time):
-    # 삭제객체 다건있을경우 시간비교 추가 필요
         """공지사항 삭제"""
         result = self.get_single_notice(notice_content, create_time)
         close_btn = None
         time_text = None
         content_text = None
         
+        time.sleep(1)
         if not result == []:
             for sub_list in result:
                 close_btn = ElementFinder.find_button_by_name(sub_list, "닫기")
@@ -201,11 +195,16 @@ class SidePage:
 
             if close_btn:
                 ElementFinder.click(close_btn)
-            return_children = self.get_popup_field()
-            if return_children:
-                delete_btn = ElementFinder.find_button_by_name(return_children, "예")
-                if delete_btn:
-                    delete_btn.click()
+                
+            time.sleep(1)
+            web_popup_group_list = self.get_popup_field()
+
+            if web_popup_group_list:
+                for items in web_popup_group_list:
+                    delete_btn = ElementFinder.find_button_by_name(items.children(), "예")
+                    if delete_btn:
+                        delete_btn.click()
+                        break
             else:
                 print("삭제 버튼을 찾을 수 없습니다.")
         else:
@@ -288,7 +287,7 @@ class SidePage:
             if button.element_info.name == "접수하기":
                 ElementFinder.click(button)
     
-    def save_user_popup(self):
+    def get_save_user_popup(self):
         """유저 저장 팝업 진입"""
         search_user_list = self.side_find_field("search_list")
         save_reservation_btn = ElementFinder.find_button_by_name(search_user_list, "환자 등록 후 예약")
@@ -297,12 +296,14 @@ class SidePage:
        
     def combo_item_retrun(self, combo_list):
         """예약시간 랜덤 선택"""
+        print(combo_list)
         combo_list.set_focus()
         time.sleep(0.5)
         combo_list.expand()
         time.sleep(0.5)
         
         list_items = combo_list.children()
+        print(list_items)
         combo_items = list_items[0].children()
         label, real_items = combo_items[0].element_info.name, combo_items[1:]
 
@@ -321,35 +322,59 @@ class SidePage:
             break
         send_keys(select_time)
                 
-    def get_reserve_elements(self, find_type: str):
-        """
-            해당 타입의 예약 요소들을 리턴
-            ComboBox, Edit, List, Text, Button
-        """
-        reserve_list = self.side_find_field("reservation_group")
-        return [
-            item for item in reserve_list.children()
-            if item.element_info.control_type == find_type
-        ]
+    def combo_item_retrun_test(self, combo_list):
+        """예약시간 랜덤 선택"""
+        combo_list.set_focus()
+        time.sleep(0.5)
+        combo_list.expand()
+        time.sleep(0.5)
+        list_items = combo_list.children()
+        combo_items = list_items[0]
+        label, real_items = combo_items.element_info.name, combo_items[1:]
 
+        now = datetime.now()
+        current_hour = now.hour
         
+        while True:
+            random_item = random.choice(real_items)
+            select_time = random_item.element_info.name
+
+            if not select_time.isdigit():
+                continue
+            if label == "시간":
+                if int(select_time) <= current_hour:
+                    continue
+            break
+        send_keys(select_time)            
+    
     def reserve_user(self, UserDTO: UserDTO):
         """유저 예약"""
-        combo_list = self.get_reserve_elements("ComboBox")
-        text_list = self.get_reserve_elements("Text")
-        btn_list = self.get_reserve_elements("Button")
-        
-        if all(
-            element.element_info.name not in [UserDTO.chart_no, UserDTO.name, UserDTO.mobile_no]
-            for element in text_list
-        ):print("예약 환자의 정보를 확인하세요")
-        
-        self.combo_item_retrun(combo_list[0])
-        self.combo_item_retrun(combo_list[1])
-        
-        reserve_btn = btn_list[0]
-        if reserve_btn:
-            ElementFinder.click(reserve_btn)
-    
+        time.sleep(1.5)
+        reserve_list = self.side_find_field("reservation_group")
+        if reserve_list:
+            with ThreadPoolExecutor() as executor:
+                combo_list = executor.submit(ElementFinder.find_combobox, reserve_list.children())
+                text_list = executor.submit(ElementFinder.find_text, reserve_list.children())
+                btn_list = executor.submit(ElementFinder.find_buttons, reserve_list.children())
+
+                combo_arr = combo_list.result()
+                text_arr = text_list.result()
+                btn_arr = btn_list.result()
+            
+            if all(
+                element.element_info.name not in [UserDTO.chart_no, UserDTO.name, UserDTO.mobile_no]
+                for element in text_arr
+            ):print("예약 환자의 정보를 확인하세요")
+            
+            time.sleep(0.5)
+            
+            for combo_item in combo_arr:
+                self.combo_item_retrun_test(combo_item)
+            
+            reserve_btn = btn_arr[0]
+            if reserve_btn:
+                ElementFinder.click(reserve_btn)
+                
+            
     def reserve_user_with_time(self):
         return 

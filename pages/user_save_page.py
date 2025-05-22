@@ -12,21 +12,22 @@ from utils.element_finder import ElementFinder
 class UserSavePage():
     def __init__(self, app_manger = AppManger):
         self.app_manger = app_manger
+        self.user_save_popup_field = None
 
     def get_save_user_field(self):
-        """고객 등록 팝업 가져오기"""
         app_title = self.app_manger.version_search(DashboardLocators.MAIN_FORM_TITLE)
         side_window = Desktop(backend="uia").window(title=app_title)
-        popup_field = ElementFinder.find_element(side_window, title="고객등록", auto_id="FrmRegPatInfo",control_type="Window")
+        popup_list = ElementFinder.find_element(side_window, title="고객등록", auto_id="FrmRegPatInfo",control_type="Window")
         
+        """고객 등록 팝업 가져오기"""
         time.sleep(1.5)
-        popup_field.children()[0].set_focus()
-        return popup_field.children()[0]
+        
+        popup_list.children()[0].set_focus()
+        self.user_save_popup_field = popup_list.children()[0]
     
     def get_popup_button_field(self, find_name):
         """고객등록 팝업 버튼 가져오기"""
-        pane_list = self.get_save_user_field()
-        button_field = pane_list.children()[2]
+        button_field = self.user_save_popup_field.children()[2]
         if find_name in ["저장", "저장+예약", "저장+접수"]:
             btn = ElementFinder.find_button_by_name(button_field.children(), find_name)
             return btn
@@ -41,7 +42,8 @@ class UserSavePage():
         return ElementFinder.find_edits_by_automation_id(pane_field.children(), ["TxtMobileNo1", "TxtMobileNo2", "TxtMobileNo3"])
 
     def get_popup_edit_field(self):
-        pane_field = self.get_save_user_field().children()[0]
+        time.sleep(0.5)
+        pane_field = self.user_save_popup_field.children()[0]
         with ThreadPoolExecutor() as executor:
             future_chart = executor.submit(self.get_chart_fields, pane_field)
             future_jno = executor.submit(self.get_jno_fields, pane_field)
@@ -65,8 +67,8 @@ class UserSavePage():
 
     def input_jno_info(self, edit_list, jno):
         if jno:
-            ElementFinder.input_text(edit_list[2], jno[0:6])
-            ElementFinder.input_text(edit_list[3], jno[7:14])
+            ElementFinder.input_text(edit_list[2], jno[7:14])
+            ElementFinder.input_text(edit_list[3], jno[0:6])
         else:
             assert False, "환자 주민번호가 입력되지않았습니다."
 
@@ -106,6 +108,6 @@ class UserSavePage():
             save_button = self.get_popup_button_field("저장+예약")
         else:
             save_button = self.get_popup_button_field("저장")
-            
+
         if save_button:
             ElementFinder.click(save_button)

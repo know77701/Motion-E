@@ -1,4 +1,4 @@
-from pywinauto import Desktop
+from pywinauto import Desktop, findwindows, keyboard, mouse
 from pywinauto.findwindows import ElementAmbiguousError, find_element
 
 from locators.chart_locators import ChartLocators
@@ -7,11 +7,11 @@ from utils.app_manager import AppManger
 
 
 class ElementFinder:
-    """UI 요소를 찾는 유틸 클래스"""
     def __init__(self):
         self.app = AppManger()
     
-    def recursive_children_with_name_and_element(self,element, find_name, find_element,depth, max_depth):
+    @staticmethod
+    def recursive_children_with_name_and_element(element, find_name, find_element,depth, max_depth):
         """지정한 깊이까지 모든 하위 자식 노드 재귀 순회"""
         result = []
         if depth > max_depth:
@@ -24,11 +24,12 @@ class ElementFinder:
             if name in find_name and ctrl_type == find_element:
                 result.append(child)
                 
-            result.extend(self.recursive_children_with_name_and_element(child, find_name, find_element ,depth + 1, max_depth))
+            result.extend(ElementFinder.recursive_children_with_name_and_element(child, find_name, find_element ,depth + 1, max_depth))
             
         return result
     
-    def recursive_children_with_control_type(self,element, find_element,depth, max_depth):
+    @staticmethod
+    def recursive_children_with_control_type(element, find_element,depth, max_depth):
         """지정한 깊이까지 모든 하위 자식 노드 재귀 순회"""
         result = []
         if depth > max_depth:
@@ -39,23 +40,24 @@ class ElementFinder:
             if ctrl_type == find_element:
                 result.append(child)
                 
-            result.extend(self.recursive_children_with_control_type(child, find_element ,depth + 1, max_depth))
+            result.extend(ElementFinder.recursive_children_with_control_type(child, find_element ,depth + 1, max_depth))
             
         return result
     
-    def recursive_children(self, element, depth, max_depth):
+    @staticmethod
+    def recursive_children(element, depth, max_depth):
         result = []
         if depth > max_depth:
             return result
         
         if isinstance(element, list):
             for el in element:
-                result.extend(self.recursive_children(el, depth, max_depth))
+                result.extend(ElementFinder.recursive_children(el, depth, max_depth))
             return result
         else:
             for child in element.children():
                 result.append(child)
-                result.extend(self.recursive_children(child, depth + 1, max_depth))
+                result.extend(ElementFinder.recursive_children(child, depth + 1, max_depth))
         return result
             
     @staticmethod        
@@ -63,6 +65,12 @@ class ElementFinder:
         """크롬 필드 객체 가져오기"""
         side_window = Desktop(backend="uia").window(title=app_title)
         return side_window.child_window(class_name="Chrome_RenderWidgetHostHWND").wrapper_object()
+
+    @staticmethod        
+    def get_find_user_field(app_title):
+        """크롬 필드 객체 가져오기"""
+        side_window = Desktop(backend="uia").window(title=app_title)
+        return side_window.child_window(auto_id="ControlFPopup").wrapper_object()
 
     @staticmethod
     def get_chart_field(app_title, assert_alert_fn):
@@ -88,9 +96,10 @@ class ElementFinder:
         return (item for item in elements if item.element_info.control_type == "Button")
  
     @staticmethod
-    def list_in_find_button(elements):
+    def list_in_find_button_by_name(elements, find_name):
         return next((element for item in elements for element in item.children()
-                if element.element_info.control_type == "Button"), None)
+                if element.element_info.control_type == "Button" and 
+                element.element_info.name == find_name), None)
 
     @staticmethod
     def find_button_by_name(elements, name):
@@ -163,6 +172,10 @@ class ElementFinder:
         return next((item for item in elements if item.element_info.control_type == "Custom"), None)
     
     @staticmethod
+    def find_customs(elements):
+        return [item for item in elements if item.element_info.control_type == "Custom"]
+    
+    @staticmethod
     def find_text_by_name(elements,name):
         return next((item for item in elements if item.element_info.control_type == "Text"
                      and item.element_info.name == name), None)
@@ -215,4 +228,9 @@ class ElementFinder:
         else:
             raise Exception(f"입력할 수 없음: {element}")
     
-    
+    @staticmethod
+    def send_key(send_value):
+        if send_value:
+            keyboard.send_keys(send_value)
+        else:
+            raise Exception(f"키 입력할 수 없음 :{send_value}" )
