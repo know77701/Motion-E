@@ -1,12 +1,10 @@
 import threading
 import time
 
-from pywinauto import Application, Desktop, application, findwindows
+from pywinauto import findwindows
 from pywinauto.controls.hwndwrapper import HwndWrapper
 
-# from locators.receive_locators import ReceiveLocators
-# from utils.app_manager import AppManger
-# from utils.element_finder import ElementFinder
+from utils.element_finder import ElementFinder
 
 
 class ClosePopupThread(threading.Thread):
@@ -35,14 +33,19 @@ class ClosePopupThread(threading.Thread):
 
                 for proc_list in procs:
                     if proc_list.control_type == "Telerik.WinControls.RadMessageBoxForm":
-                        for item in proc_list.children():
-                            if item.automation_id == "radLabel1":
-                                item_tle = item.name.strip().replace('\n', '').replace('\r', '').replace(' ', '')
-                            if item.automation_id == "radButton1":
-                                item_btn = item
+                        item_tle = ElementFinder.find_text(proc_list.children(),"radLabel1")
+                        if item_tle:
+                            item_tle = item_tle.name.strip().replace('\n', '').replace('\r', '').replace(' ', '')
+                        item_btn = ElementFinder.find_button_by_auto_id(proc_list.children(), "radButton1")
+                        # for item in proc_list.children():
+                        #     if item.automation_id == "radLabel1":
+                        #         item_tle = item.name.strip().replace('\n', '').replace('\r', '').replace(' ', '')
+                        #     if item.automation_id == "radButton1":
+                        #         item_btn = item
                 if item_btn:
                     try:
-                        print(f"[PopupThread] 팝업 클릭 시도: {item_tle}")
+                        if item_tle:
+                            print(f"[PopupThread] 팝업 클릭 시도: {item_tle}")
                         btn = HwndWrapper(item_btn)
                         btn.click()
                         break

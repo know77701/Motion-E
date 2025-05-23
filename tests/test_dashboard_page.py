@@ -27,8 +27,8 @@ class TestDashBoardPage(TestBase):
         # self.test_update_notice()
         # self.test_delete_notice()
         
-        # self.test_save_user()
-        # self.test_reserve_user()
+        self.test_save_user()
+        self.test_reserve_user()
         # self.test_receive_user()
         # self.test_receive_cancel()
         # self.test_reserve_cancel()
@@ -105,7 +105,7 @@ class TestDashBoardPage(TestBase):
         """
             환자 저장 후 예약
         """
-        self.save_user = UserDTO(chart_no=None, name="QA테스트2", mobile_no="010-7441-7631", jno="941104-1111111")
+        self.save_user = UserDTO(chart_no=None, name="QA테스트", mobile_no="010-7441-7631", jno="941104-1111111")
         self.side_page.search_user(self.save_user.name)
         assert not self.side_page.compare_search_user(self.save_user), "test_save_user : 저장하려는 유저가 존재합니다. 확인해주세요."
         self.side_page.get_save_user_popup()

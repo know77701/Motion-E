@@ -20,7 +20,7 @@ class UserSavePage():
         popup_list = ElementFinder.find_element(side_window, title="고객등록", auto_id="FrmRegPatInfo",control_type="Window")
         
         """고객 등록 팝업 가져오기"""
-        time.sleep(1.5)
+        time.sleep(0.5)
         
         popup_list.children()[0].set_focus()
         self.user_save_popup_field = popup_list.children()[0]

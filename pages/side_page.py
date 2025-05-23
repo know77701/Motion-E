@@ -245,15 +245,15 @@ class SidePage:
 
                 name = item.element_info.name
                 if UserDTO.name and UserDTO.chart_no:
-                    if UserDTO.name in name:
+                    if UserDTO.name == name:
                         continue
-                    if UserDTO.chart_no in name:
+                    if UserDTO.chart_no == name:
                         return list_item
                 elif UserDTO.name:
-                    if UserDTO.name in name:
+                    if UserDTO.name == name:
                         return list_item
                 elif UserDTO.chart_no:
-                    if UserDTO.chart_no in name:
+                    if UserDTO.chart_no == name:
                         return list_item
                     
     def compare_search_user(self,UserDTO : UserDTO):
@@ -296,14 +296,16 @@ class SidePage:
        
     def combo_item_retrun(self, combo_list):
         """예약시간 랜덤 선택"""
-        print(combo_list)
         combo_list.set_focus()
-        time.sleep(0.5)
+        time.sleep(1)
+        
+        # expand 1회 요청 시 콤보박스 종종 안열려 동작 추가
         combo_list.expand()
-        time.sleep(0.5)
+        time.sleep(1)
+        combo_list.expand()
+        time.sleep(1)
         
         list_items = combo_list.children()
-        print(list_items)
         combo_items = list_items[0].children()
         label, real_items = combo_items[0].element_info.name, combo_items[1:]
 
@@ -322,31 +324,7 @@ class SidePage:
             break
         send_keys(select_time)
                 
-    def combo_item_retrun_test(self, combo_list):
-        """예약시간 랜덤 선택"""
-        combo_list.set_focus()
-        time.sleep(0.5)
-        combo_list.expand()
-        time.sleep(0.5)
-        list_items = combo_list.children()
-        combo_items = list_items[0]
-        label, real_items = combo_items.element_info.name, combo_items[1:]
-
-        now = datetime.now()
-        current_hour = now.hour
-        
-        while True:
-            random_item = random.choice(real_items)
-            select_time = random_item.element_info.name
-
-            if not select_time.isdigit():
-                continue
-            if label == "시간":
-                if int(select_time) <= current_hour:
-                    continue
-            break
-        send_keys(select_time)            
-    
+     
     def reserve_user(self, UserDTO: UserDTO):
         """유저 예약"""
         time.sleep(1.5)
@@ -369,7 +347,7 @@ class SidePage:
             time.sleep(0.5)
             
             for combo_item in combo_arr:
-                self.combo_item_retrun_test(combo_item)
+                self.combo_item_retrun(combo_item)
             
             reserve_btn = btn_arr[0]
             if reserve_btn:
