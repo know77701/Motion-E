@@ -17,6 +17,6 @@ class TestBase():
         self.window = self.app_manager.motion_app_connect(retries=0)
         
     def shutdown(self):
-        self.quit_event.set()
         self.start_event.set()
+        self.quit_event.set()
         self.popup_thread.join()
