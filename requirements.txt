@@ -1,4 +1,4 @@
-pywinauto 
+Appium-Python-Client
 pyautogui 
 functools
 PIL

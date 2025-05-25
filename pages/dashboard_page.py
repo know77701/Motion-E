@@ -1,10 +1,8 @@
 import re
-import time
 
+from locators.dashboard_locators import DashboardLocators
 from utils.app_manager import AppManger
 from utils.element_finder import ElementFinder
-from locators.dashboard_locators import DashboardLocators
-
 
 
 class DashBoardPage():
@@ -40,6 +38,28 @@ class DashBoardPage():
 
     def time_string(self, name):
         return re.match(r"^\d{1,2}:\d{2}$", name) is not None
+    
+    def find_user_search(self, user_name):
+        user_find_window = self.open_user_search_popup()
+        search_edit, search_btn =self.get_user_search_controls(user_find_window)
+        self.perform_user_search(search_edit, search_btn,user_name)
+    
+    def open_user_search_popup(self):
+        ElementFinder.send_key("^F")
+        return ElementFinder.get_find_user_field(self.app_title)
+
+    def get_user_search_controls(self, user_find_window):
+        window_items = ElementFinder.recursive_children(user_find_window.children(), 0, 2)
+        search_edit = ElementFinder.find_edit_by_automation_id(window_items,"radtextBoxSearchBox")
+        search_btn = ElementFinder.find_button_by_auto_id(window_items, "radButtonSearch")
+        return search_edit, search_btn
+
+    def perform_user_search(self, search_edit, search_btn, user_name):
+        if search_edit:
+            ElementFinder.input_text(search_edit, user_name)
+        if search_btn:
+            ElementFinder.click(search_btn)
+    
 
     def get_treatment_and_payment_field_user_list(self, find_name):
         reservation_list_field = self.find_field(find_name)
@@ -83,8 +103,8 @@ class DashBoardPage():
             for el in reservation_list_field.children():
                 ctrl_type = el.friendly_class_name()
                 auto_id = el.element_info.automation_id
-                
                 if find_name == "예약":
+                    
                     if ctrl_type == "ListBox" and auto_id == "rsrv-list":
                         return el
                 if find_name == "부도":
@@ -117,60 +137,61 @@ class DashBoardPage():
         else:
             print("찾으려는 대시보드 영역을 정확히 입력해주세요.")
             return None
-
         return target_items
     
     def get_reservation_list(self,chart_no):
         field_user_list = self.get_field_user_list("예약", chart_no)
-        self.validate_user_exists(field_user_list)
+        return self.validate_user_exists(field_user_list)
         
     def get_reception_list(self,chart_no):
         field_user_list = self.get_field_user_list("접수", chart_no)
-        self.validate_user_exists(field_user_list)
+        return self.validate_user_exists(field_user_list)
             
     def get_treatment_list(self,chart_no):
         field_user_list = self.get_field_user_list("시술", chart_no)
-        self.validate_user_exists(field_user_list)
+        return self.validate_user_exists(field_user_list)
             
     def get_payment_list(self,chart_no):
         field_user_list = self.get_field_user_list("수납", chart_no)
-        self.validate_user_exists(field_user_list)
+        return self.validate_user_exists(field_user_list)
 
     def get_cancle_button(self, find_name,chart_no):
         find_user = self.get_field_user_list(find_name, chart_no)
-        cancle_btn = ElementFinder.list_in_find_button(find_user.children())
-        
+        cancle_btn = ElementFinder.list_in_find_button_by_name(find_user, "닫기")
         if cancle_btn:
             ElementFinder.click(cancle_btn)
+            return True
+        else:
+            return False
     
     def cancle_web_popup_action(self):
         parent_field = ElementFinder.get_chrome_field(self.app_title)
         custom_element = ElementFinder.find_custom(parent_field.children())
         group_list = ElementFinder.find_group_list(custom_element.children())
-        for group_item in group_list:
-            cancel_button = ElementFinder.find_button_by_name(group_item.children(), "예")
-            if cancel_button:
-                ElementFinder.click(cancel_button)
-                return True
-        return False
-        
-    def reservation_cancel(self,chart_no):
-        self.get_cancle_button("예약",chart_no)
+        if group_list:
+            for group_item in group_list:
+                cancel_button = ElementFinder.find_button_by_name(group_item.children(), "예")
+                if cancel_button:
+                    ElementFinder.click(cancel_button)
+                    return True
+            return False
+        else:
+            return False
+    
+    def reservation_cancel_popup_control(self):
         parent_field = ElementFinder.get_chrome_field(self.app_title)
         cancel_btn = ElementFinder.find_button_by_name(parent_field.children(), "저장")
         if cancel_btn:
             ElementFinder.click(cancel_btn)
-        
-        self.cancle_web_popup_action()
         
     def reception_cancel(self, chart_no):
         self.get_cancle_button("접수",chart_no)
         self.cancle_web_popup_action()
         
     def validate_user_exists(self, user_list):
-        if not user_list:
-            return False
-        return True
+        if user_list:
+            return True
+        return False
     
     def open_chart(self,chart_no):
         field_user_list = self.get_field_user_list("예약", chart_no)

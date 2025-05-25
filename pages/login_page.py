@@ -4,6 +4,7 @@ from locators.login_locators import LoginLocators
 from utils.app_screen_shot import window_screen_shot
 from utils.element_finder import ElementFinder
 
+
 class LoginPage:
     """
         로그인 객체 모음
@@ -13,7 +14,7 @@ class LoginPage:
     
     """병원정보 영역 보이기"""
     def hospital_info_view(self):
-        keyboard.send_keys("^h")
+        ElementFinder.send_key("^h")
         yakiho_window = self.login_window.child_window(auto_id=LoginLocators.YAKIHO_TEXT_ID)
         if not yakiho_window.exists():
             raise Exception("요양기관번호 입력영역을 찾을 수 없습니다.")

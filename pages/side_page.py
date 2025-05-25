@@ -1,5 +1,6 @@
 import random
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
 from pywinauto import Desktop
@@ -25,7 +26,7 @@ class SidePage:
         """사이드 영역 객체 찾기"""
         side_field = ElementFinder.get_chrome_field(self.app_title)
         side_list = side_field.children()
-    
+        
         if find_name in ["bookmark_btn", "search_btn", "today_btn"]:
             button_boxes = ElementFinder.find_buttons(side_list)
             if find_name == "bookmark_btn":
@@ -35,45 +36,38 @@ class SidePage:
             if find_name == "today_btn":
                 return ElementFinder.find_button_by_name(side_list, "오늘")
         
-        if find_name in ["doctor_filter_list", "insurance_filter_list"]:
+        elif find_name in ["doctor_filter_list", "insurance_filter_list"]:
             list_boxes = ElementFinder.find_lists(side_list)
             if find_name == "doctor_filter_list":
                 return list_boxes[0]
             if find_name == "insurance_filter_list":
                 return list_boxes[1]
         
-        if find_name == "search_edit":
+        elif find_name == "search_edit":
             return ElementFinder.find_edit_by_automation_id(side_list, "srch-val")
         
-        if find_name in ["notice_group", "reservation_list", "reservation_group", "search-list"]:
+        elif find_name in ["notice_group", "reservation_list", "reservation_group", "search_list"]:
             doc_boxes = ElementFinder.find_documents(side_list)
-            if find_name in ["notice_group", "search-list"]:
+
+            if find_name in ["notice_group", "search_list"]:
                 return doc_boxes[0].children()
-            if find_name == "reservation_list":
+            elif find_name == "reservation_list":
                 return doc_boxes[1].children()
-            if find_name == "reservation_group":
+            elif find_name == "reservation_group":
                 return ElementFinder.find_documents_by_automation_id(side_list,"reservation")
     
-        if find_name in ["reserve_list"]:
+        elif find_name in ["reserve_list"]:
             return ElementFinder.find_group_by_automation_id(side_list,"scTab")
     
     
     def get_popup_field(self):
         """대시보드 웹 팝업 찾기"""
+        side_field = ElementFinder.get_chrome_field(self.app_title)
+        custom_wrapper = ElementFinder.find_customs(side_field.children())
+        for item in custom_wrapper:
+            group_list = ElementFinder.find_group_list(item.children())
         
-        side_field = ElementFinder.get_chrome_field(self.app_title )
-        return_data = side_field.children()
-        custom_wrapper = None
-        popup_btn_list = []
-        
-        custom_wrapper = ElementFinder.find_custom(return_data)
-        group_list = ElementFinder.find_group(custom_wrapper.children())
-        
-        for items in group_list.children():
-            if items.element_info.control_type == "Button":
-                popup_btn_list.append(items)
-        return popup_btn_list
-
+        return group_list
 
     def save_notice(self, set_value):
         """공지사항 입력"""
@@ -82,7 +76,7 @@ class SidePage:
             edit_item = ElementFinder.find_edit(notice_group)
             edit_item.set_text("")
             edit_item.set_text(set_value)
-            time.sleep(0.5)
+            time.sleep(1)
             edit_item.set_focus()
             send_keys("{ENTER}")
             return datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
@@ -129,7 +123,7 @@ class SidePage:
             if has_notice_content and has_create_time:
                 filtered_data.append(sub_list)
         return filtered_data
-    
+
 
     def compare_notice(self, notice_content, compare_time):
         """공지사항 비교 확인"""
@@ -158,7 +152,8 @@ class SidePage:
         """업데이트 폼 가져오기"""
         return_data = self.get_notice()
         for data_list in return_data:
-            return ElementFinder.find_edit(data_list)
+            if ElementFinder.find_edit(data_list):
+                return data_list
 
     def update_notice(self, notice_content,create_time,update_content):
         """공지사항 수정"""
@@ -168,9 +163,8 @@ class SidePage:
             
             for el in result:
                 item = ElementFinder.find_text_by_name(el, notice_content)
-                
                 if item:
-                    ElementFinder.click(item)
+                    item.click_input()
                     time.sleep(0.5)
                     break
                     
@@ -185,13 +179,13 @@ class SidePage:
             ElementFinder.click(update_save_btn)
         
     def delete_notice(self, notice_content,create_time):
-    # 삭제객체 다건있을경우 시간비교 추가 필요
         """공지사항 삭제"""
         result = self.get_single_notice(notice_content, create_time)
         close_btn = None
         time_text = None
         content_text = None
         
+        time.sleep(1)
         if not result == []:
             for sub_list in result:
                 close_btn = ElementFinder.find_button_by_name(sub_list, "닫기")
@@ -201,11 +195,16 @@ class SidePage:
 
             if close_btn:
                 ElementFinder.click(close_btn)
-            return_children = self.get_popup_field()
-            if return_children:
-                delete_btn = ElementFinder.find_button_by_name(return_children, "예")
-                if delete_btn:
-                    delete_btn.click()
+                
+            time.sleep(1)
+            web_popup_group_list = self.get_popup_field()
+
+            if web_popup_group_list:
+                for items in web_popup_group_list:
+                    delete_btn = ElementFinder.find_button_by_name(items.children(), "예")
+                    if delete_btn:
+                        delete_btn.click()
+                        break
             else:
                 print("삭제 버튼을 찾을 수 없습니다.")
         else:
@@ -233,7 +232,7 @@ class SidePage:
     
     def get_search_user_list(self):
         """검색영역 유저리스트 가져오기"""
-        search_user_list = self.side_find_field("search-list")
+        search_user_list = self.side_find_field("search_list")
         list_object = self.get_child_list(search_user_list)
         return list_object
 
@@ -246,21 +245,20 @@ class SidePage:
 
                 name = item.element_info.name
                 if UserDTO.name and UserDTO.chart_no:
-                    if UserDTO.name in name:
+                    if UserDTO.name == name:
                         continue
-                    if UserDTO.chart_no in name:
+                    if UserDTO.chart_no == name:
                         return list_item
                 elif UserDTO.name:
-                    if UserDTO.name in name:
+                    if UserDTO.name == name:
                         return list_item
                 elif UserDTO.chart_no:
-                    if UserDTO.chart_no in name:
+                    if UserDTO.chart_no == name:
                         return list_item
                     
     def compare_search_user(self,UserDTO : UserDTO):
         """검색 환자 리턴"""
         user_list = self.get_search_user_list()
-        
         if UserDTO.name is not None or UserDTO.chart_no is not None:
             compare_user =  self.compare_user_list(user_list, UserDTO)
             if compare_user is []:
@@ -289,7 +287,7 @@ class SidePage:
             if button.element_info.name == "접수하기":
                 ElementFinder.click(button)
     
-    def save_user_popup(self):
+    def get_save_user_popup(self):
         """유저 저장 팝업 진입"""
         search_user_list = self.side_find_field("search_list")
         save_reservation_btn = ElementFinder.find_button_by_name(search_user_list, "환자 등록 후 예약")
@@ -299,9 +297,13 @@ class SidePage:
     def combo_item_retrun(self, combo_list):
         """예약시간 랜덤 선택"""
         combo_list.set_focus()
-        time.sleep(0.5)
+        time.sleep(1)
+        
+        # expand 1회 요청 시 콤보박스 종종 안열려 동작 추가
         combo_list.expand()
-        time.sleep(0.5)
+        time.sleep(1)
+        combo_list.expand()
+        time.sleep(1)
         
         list_items = combo_list.children()
         combo_items = list_items[0].children()
@@ -322,35 +324,35 @@ class SidePage:
             break
         send_keys(select_time)
                 
-    def get_reserve_elements(self, find_type: str):
-        """
-            해당 타입의 예약 요소들을 리턴
-            ComboBox, Edit, List, Text, Button
-        """
-        reserve_list = self.side_find_field("reservation_group")
-        return [
-            item for item in reserve_list.children()
-            if item.element_info.control_type == find_type
-        ]
-
-        
+     
     def reserve_user(self, UserDTO: UserDTO):
         """유저 예약"""
-        combo_list = self.get_reserve_elements("ComboBox")
-        text_list = self.get_reserve_elements("Text")
-        btn_list = self.get_reserve_elements("Button")
-        
-        if all(
-            element.element_info.name not in [UserDTO.chart_no, UserDTO.name, UserDTO.mobile_no]
-            for element in text_list
-        ):print("예약 환자의 정보를 확인하세요")
-        
-        self.combo_item_retrun(combo_list[0])
-        self.combo_item_retrun(combo_list[1])
-        
-        reserve_btn = btn_list[0]
-        if reserve_btn:
-            ElementFinder.click(reserve_btn)
-    
+        time.sleep(1.5)
+        reserve_list = self.side_find_field("reservation_group")
+        if reserve_list:
+            with ThreadPoolExecutor() as executor:
+                combo_list = executor.submit(ElementFinder.find_combobox, reserve_list.children())
+                text_list = executor.submit(ElementFinder.find_text, reserve_list.children())
+                btn_list = executor.submit(ElementFinder.find_buttons, reserve_list.children())
+
+                combo_arr = combo_list.result()
+                text_arr = text_list.result()
+                btn_arr = btn_list.result()
+            
+            if all(
+                element.element_info.name not in [UserDTO.chart_no, UserDTO.name, UserDTO.mobile_no]
+                for element in text_arr
+            ):print("예약 환자의 정보를 확인하세요")
+            
+            time.sleep(0.5)
+            
+            for combo_item in combo_arr:
+                self.combo_item_retrun(combo_item)
+            
+            reserve_btn = btn_arr[0]
+            if reserve_btn:
+                ElementFinder.click(reserve_btn)
+                
+            
     def reserve_user_with_time(self):
         return 
