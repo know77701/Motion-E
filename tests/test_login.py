@@ -1,24 +1,19 @@
-import time
-
-from locators.login_locators import LoginLocators
-from pages.login_page import *
+import pytest
 from pages.login_page import LoginPage
-from tests.test_base import TestBase
-from tests.test_login import *
+from locators.login_locators import LoginLocators
 
+@pytest.mark.usefixtures("app_manager")
+class TestLogin:
+    @pytest.fixture(autouse=True)
+    def setup(self, app_manager):
+        """pytest가 매 테스트 전에 실행하는 setup"""
+        window = app_manager.app_connect(retries=0).window(title=LoginLocators.LOGIN_FORM_TITLE)
+        self.login = LoginPage(window)
 
-class TestLogin(TestBase):
-    def __init__(self):
-        super.__init__()
-        
-        self.login = LoginPage(self.window)
-        self.test_login_process()
-
-    """로그인 테스트"""
     def test_login_process(self):
+        """로그인 테스트"""
         self.login.hospital_info_view()
         self.login.hospital_yakiho_setting(LoginLocators.YAKIHO_VALUE)
         self.login.user_id_setting("ADMIN")
         self.login.user_pw_setting("xmfkdldjq1!1")
         self.login.login_btn_click()
-        

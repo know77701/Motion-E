@@ -296,14 +296,12 @@ class SidePage:
        
     def combo_item_retrun(self, combo_list):
         """예약시간 랜덤 선택"""
-        print(combo_list)
         combo_list.set_focus()
         time.sleep(0.5)
         combo_list.expand()
         time.sleep(0.5)
         
         list_items = combo_list.children()
-        print(list_items)
         combo_items = list_items[0].children()
         label, real_items = combo_items[0].element_info.name, combo_items[1:]
 
