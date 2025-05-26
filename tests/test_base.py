@@ -1,7 +1,7 @@
 import threading
 
 from utils.app_manager import AppManger
-from utils.multi_thread import ClosePopupThread
+from utils.close_popup_thread import ClosePopupThread
 
 
 class TestBase():

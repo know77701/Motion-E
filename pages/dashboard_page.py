@@ -9,6 +9,7 @@ class DashBoardPage():
     def __init__(self, app_manger: AppManger):
         self.app_manger = app_manger
         self.app_title = self.app_manger.version_search(DashboardLocators.MAIN_FORM_TITLE)
+        self.parent_field = ElementFinder.get_chrome_field(self.app_title)
         
     def find_field(self, find_name):
         name_map = {
@@ -17,8 +18,8 @@ class DashBoardPage():
             "수납": "완료",
             "시술": "경과시간"
         }
-        parent_field = ElementFinder.get_chrome_field(self.app_title)
-        dashboard_field = ElementFinder.find_documents(parent_field.children())
+        
+        dashboard_field = ElementFinder.find_documents(self.parent_field.children())
         keyword = name_map.get(find_name, None)
         
         for element_list in dashboard_field:
@@ -40,11 +41,13 @@ class DashBoardPage():
         return re.match(r"^\d{1,2}:\d{2}$", name) is not None
     
     def find_user_search(self, user_name):
+        self.parent_field.set_focus()
         user_find_window = self.open_user_search_popup()
         search_edit, search_btn =self.get_user_search_controls(user_find_window)
         self.perform_user_search(search_edit, search_btn,user_name)
     
     def open_user_search_popup(self):
+
         ElementFinder.send_key("^F")
         return ElementFinder.get_find_user_field(self.app_title)
 
@@ -165,22 +168,22 @@ class DashBoardPage():
             return False
     
     def cancle_web_popup_action(self):
-        parent_field = ElementFinder.get_chrome_field(self.app_title)
-        custom_element = ElementFinder.find_custom(parent_field.children())
+        custom_element = ElementFinder.find_custom(self.parent_field.children())
         group_list = ElementFinder.find_group_list(custom_element.children())
+        result = False
         if group_list:
             for group_item in group_list:
                 cancel_button = ElementFinder.find_button_by_name(group_item.children(), "예")
                 if cancel_button:
                     ElementFinder.click(cancel_button)
-                    return True
-            return False
+                    result = True
+                    return result
+            return result
         else:
-            return False
+            return result
     
     def reservation_cancel_popup_control(self):
-        parent_field = ElementFinder.get_chrome_field(self.app_title)
-        cancel_btn = ElementFinder.find_button_by_name(parent_field.children(), "저장")
+        cancel_btn = ElementFinder.find_button_by_name(self.parent_field.children(), "저장")
         if cancel_btn:
             ElementFinder.click(cancel_btn)
         

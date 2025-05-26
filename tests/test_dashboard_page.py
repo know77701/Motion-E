@@ -122,7 +122,6 @@ class TestDashBoardPage(TestBase):
         
         ElementFinder.send_key("{F1}")
         time.sleep(1)
-        
     
     def test_save_with_receive(self):
         """
@@ -160,7 +159,6 @@ class TestDashBoardPage(TestBase):
         time.sleep(2)
         
         assert self.dashboard_page.get_reservation_list(self.save_user.chart_no), "test_reserve_user : 환자 예약되지 않았습니다."
-        
 
     def test_receive_user(self):
         self.side_page.search_user(self.save_user.chart_no)
@@ -193,7 +191,6 @@ class TestDashBoardPage(TestBase):
     
     def test_check_reserve_receive_cancellation():
         return
-        
     
     def test_open_chart(self):
         assert self.dashboard_page.open_chart(self.save_user.chart_no), "test_open_chart : 환자 차트 열기 실패"
