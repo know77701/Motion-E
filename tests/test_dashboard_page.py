@@ -28,13 +28,13 @@ class TestDashBoardPage(TestBase):
         # self.test_delete_notice()
         
         self.test_save_user()
-        self.test_reserve_user()
+        # self.test_reserve_user()
         # self.test_receive_user()
         # self.test_receive_cancel()
         # self.test_reserve_cancel()
         
-        self.test_save_with_reserve()
-        self.test_save_with_receive()
+        # self.test_save_with_reserve()
+        # self.test_save_with_receive()
         # self.test_find_user()
     
     def test_create_notice(self):

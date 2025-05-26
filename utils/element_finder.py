@@ -85,7 +85,12 @@ class ElementFinder:
 
     @staticmethod
     def find_text(elements):
-        return [item for item in elements if item.element_info.control_type == "Text"]
+        return (item for item in elements if item.element_info.control_type == "Text")
+    
+    @staticmethod
+    def find_text_with_auto_id(elements,auto_id):
+            return [item for item in elements if item.control_type == "Text"
+                    and item.automation_id == auto_id]
 
     @staticmethod
     def find_buttons(elements):
