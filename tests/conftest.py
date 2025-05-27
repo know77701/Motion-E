@@ -5,7 +5,10 @@ import pytest
 from dto.user_dto import UserDTO
 from pages.dashboard_page import DashBoardPage
 from pages.receive_page import ReceivePage
+from pages.reservation_tab_page import ReservationTab
+from pages.side_chart_page import SideChartPage
 from pages.side_page import SidePage
+from pages.user_chart_page import UserChartPage
 from pages.user_save_page import UserSavePage
 from utils.app_manager import AppManger
 from utils.close_popup_thread import ClosePopupThread
@@ -13,6 +16,9 @@ from utils.close_popup_thread import ClosePopupThread
 
 class NoticeContext:
     create_time = None
+
+class SideChartContext:
+    create_tiem = None
 
 class UserContext:
     def __init__(self):
@@ -27,6 +33,14 @@ def save_user_ctx():
     return UserContext()
 
 @pytest.fixture(scope="session")
+def notice_context():
+    return NoticeContext()
+
+@pytest.fixture(scope="session")
+def side_chart_context():
+    return SideChartContext()
+
+@pytest.fixture(scope="session")
 def thread_result():
     return ThreadResultContext()
 
@@ -35,10 +49,6 @@ def app_manager():
     app = AppManger()
     app.check_admin()
     return app
-
-@pytest.fixture(scope="session")
-def notice_context():
-    return NoticeContext()
 
 @pytest.fixture(scope="session")
 def dashboard_page(app_manager):
@@ -55,6 +65,18 @@ def side_page(app_manager):
 @pytest.fixture(scope="session")
 def user_save_page(app_manager):
     return UserSavePage(app_manager)
+
+@pytest.fixture(scope="session")
+def side_chart_page(app_manager):
+    return SideChartPage(app_manager)
+
+@pytest.fixture(scope="session")
+def user_chart_page(app_manager):
+    return UserChartPage(app_manager)
+
+@pytest.fixture(scope="session")
+def reservation_tab_page(app_manager):
+    return UserChartPage(app_manager)
 
 @pytest.fixture(scope="session")
 def start_event():

@@ -1,8 +1,8 @@
-from pages.chart_page import ChartPage
+from pages.user_chart_page import ChartPage
 from utils.element_finder import ElementFinder
 
 
-class ReservationTab:
+class ReservationTabPage:
     def __init__(self):
         self.chart_page = ChartPage()
         self.element_finder = ElementFinder()

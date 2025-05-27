@@ -3,7 +3,7 @@ from datetime import datetime
 from utils.element_finder import ElementFinder
 
 
-class ChartPage:
+class UserChartPage:
     def __init__(self):
         self.element_finder = ElementFinder()
     
