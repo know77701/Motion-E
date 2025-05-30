@@ -1,14 +1,13 @@
-from pages.user_chart_page import ChartPage
 from utils.element_finder import ElementFinder
 
 
 class SideChartPage:
-    def __init__(self):
-        self.chart_page = ChartPage()
-        self.element_finder = ElementFinder()
+    def __init__(self, app_manager,user_chart_page):
+        self.app_manger = app_manager
+        self.chart_page = user_chart_page
     
     def get_side_memo_list(self):
-        memo_field = self.chart_page.get_chart_field("side_chart")
+        memo_field = self.chart_page.get_chart_field("side_chart", self.app_manger.assert_alert("사이드차트 영역을 찾을 수 없습니다."))
         for item_list in memo_field:
             memo_list = self.group_memo_items(item_list.children())
             if memo_list:
@@ -42,7 +41,7 @@ class SideChartPage:
         """사이드메모 링크 가져오기"""
         memo_field = self.chart_page.get_chart_field("side_chart")
         for item_list in memo_field:
-            element = self.element_finder.find_link_by_name(item_list.children(), find_field)
+            element = ElementFinder.find_link_by_name(item_list.children(), find_field)
             if element:
                 return element
         return None
@@ -51,7 +50,7 @@ class SideChartPage:
         """사이드메모 저장 edit 가져오기"""
         memo_field = self.chart_page.get_chart_field("side_chart")
         for item_list in memo_field:
-            element =  self.element_finder.find_edit(item_list.children())
+            element = ElementFinder.find_edit(item_list.children())
             if element:
                 return element
         return None
@@ -60,7 +59,7 @@ class SideChartPage:
         """사이드메모 저장버튼 가져오기"""
         memo_field = self.chart_page.get_chart_field("side_chart")
         for item_list in memo_field:
-            element = self.element_finder.find_button_by_name(item_list.children(), "저장")
+            element = ElementFinder.find_button_by_name(item_list.children(), "저장")
             if element:
                 return element
         return None
@@ -81,8 +80,8 @@ class SideChartPage:
     def get_side_chart(self):
         panel_list = self.chart_page.get_chart_field("side_chart")
         for item_list in panel_list:
-            if self.element_finder.find_link_by_name(item_list.children() ,"차트"):
-                buttons = self.element_finder.find_buttons(item_list.children())
+            if ElementFinder.find_link_by_name(item_list.children() ,"차트"):
+                buttons = ElementFinder.find_buttons(item_list.children())
                 chart_button = buttons[1] if len(buttons) > 1 else None
                 chart_button.click()
                 break
@@ -90,12 +89,12 @@ class SideChartPage:
     def get_comfirm_popup(self):
         panel_list = self.chart_page.get_chart_field("side_chart")
         for item_list in panel_list:
-            custom_popup = self.element_finder.find_custom(item_list.children())
+            custom_popup = ElementFinder.find_custom(item_list.children())
             if custom_popup:
                 break
 
         for items in custom_popup.children():
-            btn = self.element_finder.find_button_by_name(items.children(), "예")
+            btn = ElementFinder.find_button_by_name(items.children(), "예")
             if btn:
                 break
 

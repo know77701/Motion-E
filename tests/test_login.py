@@ -5,7 +5,6 @@ from pages.login_page import LoginPage
 
 
 @pytest.mark.skip(reason="현재 로그인 테스트 비활성화 중")
-@pytest.mark.usefixtures("app_manager")
 class TestLogin:
     @pytest.fixture(autouse=True)
     def setup(self, app_manager):

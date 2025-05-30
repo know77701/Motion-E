@@ -5,7 +5,7 @@ import pytest
 from dto.user_dto import UserDTO
 from pages.dashboard_page import DashBoardPage
 from pages.receive_page import ReceivePage
-from pages.reservation_tab_page import ReservationTab
+from pages.reservation_tab_page import ReservationTabPage
 from pages.side_chart_page import SideChartPage
 from pages.side_page import SidePage
 from pages.user_chart_page import UserChartPage
@@ -15,7 +15,10 @@ from utils.close_popup_thread import ClosePopupThread
 
 
 class NoticeContext:
-    create_time = None
+    def __init__(self):
+        self.create_content = "공지사항 테스트"
+        self.update_content = "업데이트"
+        self.create_time = None
 
 class SideChartContext:
     create_tiem = None
@@ -67,16 +70,16 @@ def user_save_page(app_manager):
     return UserSavePage(app_manager)
 
 @pytest.fixture(scope="session")
-def side_chart_page(app_manager):
-    return SideChartPage(app_manager)
+def side_chart_page(app_manager,user_chart_page):
+    return SideChartPage(app_manager,user_chart_page)
 
 @pytest.fixture(scope="session")
 def user_chart_page(app_manager):
     return UserChartPage(app_manager)
 
 @pytest.fixture(scope="session")
-def reservation_tab_page(app_manager):
-    return UserChartPage(app_manager)
+def reservation_tab_page(app_manager, user_chart_page):
+    return ReservationTabPage(app_manager, user_chart_page)
 
 @pytest.fixture(scope="session")
 def start_event():
@@ -91,7 +94,7 @@ def popup_thread(start_event, quit_event):
     thread = ClosePopupThread(start_event, quit_event)
     thread.daemon = True
     thread.start()
-    
     yield
+    start_event.set()
     quit_event.set()
     thread.join()

@@ -6,12 +6,11 @@ from pywinauto.timings import TimeoutError, wait_until_passes
 
 from dto.user_dto import UserDTO
 from locators.dashboard_locators import DashboardLocators
-from utils.app_manager import AppManger
 from utils.element_finder import ElementFinder
 
 
 class UserSavePage():
-    def __init__(self, app_manger = AppManger):
+    def __init__(self, app_manger):
         self.app_manger = app_manger
         self.user_save_popup_field = None
 

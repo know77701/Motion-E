@@ -1,8 +1,6 @@
-from pywinauto import Desktop, findwindows, keyboard, mouse
-from pywinauto.findwindows import ElementAmbiguousError, find_element
+from pywinauto import Desktop, keyboard
+from pywinauto.findwindows import ElementAmbiguousError
 
-from locators.chart_locators import ChartLocators
-from locators.dashboard_locators import DashboardLocators
 from utils.app_manager import AppManger
 
 
@@ -73,14 +71,15 @@ class ElementFinder:
         return side_window.child_window(auto_id="ControlFPopup").wrapper_object()
 
     @staticmethod
-    def get_chart_field(app_title, assert_alert_fn):
+    def get_chart_field(app_title, assert_alert):
         """차트 상위 필드 객체 가져오기"""
         try:
             side_window = Desktop(backend="uia").window(title=app_title)
             pane_list = ElementFinder.find_pane(side_window.children())
             return ElementFinder.find_pane_by_auto_id(pane_list[0].children(), "pnlRightAll")
         except ElementAmbiguousError:
-            assert_alert_fn("차트가 열려있지 않습니다.")
+            print("테스트")
+            assert_alert("차트가 열려있지 않습니다.")
             return None
 
     @staticmethod

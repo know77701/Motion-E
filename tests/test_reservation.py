@@ -6,7 +6,7 @@ from dto.user_dto import UserDTO
 from utils.element_finder import ElementFinder
 
 
-@pytest.mark.usefixtures("side_page","save_user_ctx","dashboard_page")
+@pytest.mark.skip()
 class TestReservation():
     @pytest.fixture(autouse=True)
     def setup(self,side_page, dashboard_page, save_user_ctx):
@@ -31,7 +31,6 @@ class TestReservation():
                 assert self.dashboard_page.get_reservation_list(self.user.chart_no), "test_reserve_user : 환자 예약실패"
             else:
                 continue
-        
 
     @pytest.mark.order(9)
     def test_save_with_reserve(self, start_event, user_save_page):

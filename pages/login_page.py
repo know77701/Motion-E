@@ -9,20 +9,17 @@ class LoginPage:
     """
         로그인 객체 모음
     """
-    def __init__(self, login_window):
-        self.login_window = login_window
-
+    def __init__(self, app):
+        self.login_window = app.window(title=LoginLocators.LOGIN_FORM_TITLE)
+    
     """병원정보 영역 보이기"""
     def hospital_info_view(self):
-        self.login_window.set_focus()
         ElementFinder.send_key("^h")
-
-        try:
-            self.login_window.child_window(auto_id=LoginLocators.YAKIHO_TEXT_ID).wait('exists enabled visible ready', timeout=5)
-        except TimeoutError:
+        yakiho_window = self.login_window.child_window(auto_id=LoginLocators.YAKIHO_TEXT_ID)
+        if not yakiho_window.exists():
             raise Exception("요양기관번호 입력영역을 찾을 수 없습니다.")
-
-
+    
+    """요양기관번호 입력"""
     def hospital_yakiho_setting(self, value):
         edit = ElementFinder.find_element(self.login_window,auto_id=LoginLocators.YAKIHO_TEXT_ID).wrapper_object().children()[0]
         if edit:

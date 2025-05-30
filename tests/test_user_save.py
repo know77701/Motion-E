@@ -9,8 +9,8 @@ from dto.user_dto import UserDTO
 @pytest.mark.order(4)
 def test_user_save(side_page, user_save_page, start_event,save_user_ctx):
     save_user_ctx.user = UserDTO(chart_no=None, name="QA테스트1", mobile_no="010-7441-7631", jno="941104-1111111")
-    
     user = save_user_ctx.user
+
     side_page.search_user(user.name)
     assert not side_page.compare_search_user(user), "test_save_user : 저장하려는 유저가 존재합니다. 확인해주세요."
     side_page.get_save_user_popup()

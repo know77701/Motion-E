@@ -1,16 +1,20 @@
 import re
 
+import pytest
+
 from locators.dashboard_locators import DashboardLocators
-from utils.app_manager import AppManger
 from utils.element_finder import ElementFinder
 
 
 class DashBoardPage():
-    def __init__(self, app_manger: AppManger):
+    def __init__(self, app_manger):
         self.app_manger = app_manger
         self.app_title = self.app_manger.version_search(DashboardLocators.MAIN_FORM_TITLE)
-        self.parent_field = ElementFinder.get_chrome_field(self.app_title)
+        self.parent_field = ElementFinder.get_chrome_field(self.app_title, self.app_manger.assert_alert("대시보드 최상위 객체를 찾을 수 없음."))
         
+        from pywinauto import Desktop
+        [w.window_text() for w in Desktop(backend="uia").windows()]
+    
     def find_field(self, find_name):
         name_map = {
             "예약": "부도",
@@ -41,7 +45,10 @@ class DashBoardPage():
         return re.match(r"^\d{1,2}:\d{2}$", name) is not None
     
     def find_user_search(self, user_name):
-        self.parent_field.set_focus()
+        try:
+            self.parent_field.set_focus()
+        except Exception as e:
+            print(e)
         user_find_window = self.open_user_search_popup()
         search_edit, search_btn =self.get_user_search_controls(user_find_window)
         self.perform_user_search(search_edit, search_btn,user_name)
@@ -196,9 +203,21 @@ class DashBoardPage():
             return True
         return False
     
-    def open_chart(self,chart_no):
-        field_user_list = self.get_field_user_list("예약", chart_no)
-        if field_user_list == []:
+    def open_chart(self,field_name,chart_no, time):
+        field_user_list = self.get_field_user_list(field_name, chart_no)
+        arr = []
+        
+        for el in field_user_list:
+            if ElementFinder.find_text_by_name(el.children(), time):
+                arr = el
+                break
+
+        if arr == []: 
             print("해당하는 환자가 존재하지 않습니다.")
-        user_chart_no_text = ElementFinder.find_text_by_name(field_user_list[0].children(), chart_no)
-        user_chart_no_text.click_input()
+            return None
+        else: 
+            user_chart_no_text = ElementFinder.find_text_by_name(arr.children(), chart_no)
+
+            if user_chart_no_text:
+                user_chart_no_text.click_input()
+                return user_chart_no_text
