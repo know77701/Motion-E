@@ -5,8 +5,6 @@ from utils.app_manager import AppManger
 
 
 class ElementFinder:
-    def __init__(self):
-        self.app = AppManger()
     
     @staticmethod
     def recursive_children_with_name_and_element(element, find_name, find_element,depth, max_depth):
@@ -57,7 +55,13 @@ class ElementFinder:
                 result.append(child)
                 result.extend(ElementFinder.recursive_children(child, depth + 1, max_depth))
         return result
-            
+
+    @staticmethod
+    def get_user_chart_parent_field(app_title):
+        return ElementFinder.get_chart_field(
+            app_title, lambda msg="차트가 열려있지 않습니다.": AppManger.appassert_alert(msg)
+        )
+    
     @staticmethod        
     def get_chrome_field(app_title):
         """크롬 필드 객체 가져오기"""
@@ -78,7 +82,6 @@ class ElementFinder:
             pane_list = ElementFinder.find_pane(side_window.children())
             return ElementFinder.find_pane_by_auto_id(pane_list[0].children(), "pnlRightAll")
         except ElementAmbiguousError:
-            print("테스트")
             assert_alert("차트가 열려있지 않습니다.")
             return None
 

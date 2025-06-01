@@ -12,7 +12,6 @@ class TestDashboardUtil():
         self.dashboard_page = dashboard_page
         self.ctx = save_user_ctx
 
-    @pytest.mark.skip()
     @pytest.mark.order(11)
     def test_find_user(self):
         user = self.ctx.user
@@ -30,4 +29,4 @@ class TestDashboardUtil():
     @pytest.mark.order(12)
     def test_open_chart(self):
         chart_no = "0000002351"
-        assert self.dashboard_page.open_chart("접수",chart_no, "13:17"), "환자 차트를 열수없습니다."
+        assert self.dashboard_page.open_chart("예약",chart_no, "13:17"), "환자 차트를 열수없습니다."
