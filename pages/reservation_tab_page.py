@@ -175,6 +175,7 @@ class ReservationTabPage:
                 el.set_focus()
                 raw = re.sub(r"[^\d]", "", el.element_info.name)
                 trimmed = raw[1:] if len(raw) > 1 else ""
+                
                 if trimmed:
                     temp_pair.append(trimmed)
                     if len(temp_pair) == 2:
