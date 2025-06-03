@@ -12,6 +12,7 @@ from pages.user_chart_page import UserChartPage
 from pages.user_save_page import UserSavePage
 from utils.app_manager import AppManger
 from utils.close_popup_thread import ClosePopupThread
+from pages.consent_tab_page import ConsentTabPage
 
 
 class NoticeContext:
@@ -78,8 +79,12 @@ def user_chart_page(app_manager):
     return UserChartPage(app_manager)
 
 @pytest.fixture(scope="session")
-def reservation_tab_page(app_manager, user_chart_page):
-    return ReservationTabPage(app_manager, user_chart_page)
+def reservation_tab_page(user_chart_page):
+    return ReservationTabPage(user_chart_page)
+
+@pytest.fixture(scope="session")
+def consent_tab_page(user_chart_page):
+    return ConsentTabPage(user_chart_page)
 
 @pytest.fixture(scope="session")
 def start_event():

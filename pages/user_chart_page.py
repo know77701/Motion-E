@@ -8,8 +8,11 @@ class UserChartPage:
         self.app_manager = app_manager
         self.app_title = self.app_manager.version_search(auto_id="tBeautyChartForm")
         self.parent_field = ElementFinder.get_user_chart_parent_field(self.app_title)
+
+    def get_rsrv_cancel_popup(self):
+        return ElementFinder.find_element(self.parent_field.children(), auto_id="PopReservationCancel", title="예약취소 사유")
         
-    
+
     def get_chart_title_bar(self):
         parent_field = self.parent_field
         if parent_field:
