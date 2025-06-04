@@ -19,7 +19,6 @@ class TestReservationTab():
         self.reservation_tab_page.get_new_rsrv_button().click()
         assert self.reservation_tab_page.verify_rsrv_list(), "신규예약되지 않았습니다."
         
-    
     @pytest.mark.skip()
     def test_cancel_reserve(self):
         """
@@ -42,12 +41,9 @@ class TestReservationTab():
         cancle_btn.click()
         self.reservation_tab_page.get_rsrv_cancle_popup()
         
-
         
     def test_change_reserve(self, start_event):
         self.reservation_tab_page.select_reservation_by_datetime("20250602", "1700")
         self.reservation_tab_page.change_reservation_time()
         self.reservation_tab_page.submit_reservation_change(start_event)
         self.reservation_tab_page.verify_reservation_changed()
-            
-                
