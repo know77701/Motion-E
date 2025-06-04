@@ -9,11 +9,6 @@ class TestReservationTab():
     
     @pytest.mark.skip()
     def test_new_reserve(self, start_event):
-        """
-            신규 예약 화면여부 확인 후 > 아닐경우 신규예약 버튼 클릭 > 신규화면진입 >
-            예약 시간 설정 > 예약/전달 메모 작성 > 팝업 감지 이벤트 시작 >
-            신규 예약 버튼 클릭 > 예약 리스트 확인하여 예약되었는지 확인
-        """
         self.reservation_tab_page.prepare_new_reservation("신규 예약 메모", "신규 전달 메모")
         start_event.set()
         self.reservation_tab_page.get_new_rsrv_button().click()
@@ -21,9 +16,6 @@ class TestReservationTab():
         
     @pytest.mark.skip()
     def test_cancel_reserve(self):
-        """
-            취소팝업 확인필요
-        """
         if not self.reservation_tab_page.get_cancle_rsrv_button():
             table = self.reservation_tab_page.get_rsrv_list_elements(
                 rsrv_day="20250602",
