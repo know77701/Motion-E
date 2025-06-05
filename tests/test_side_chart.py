@@ -26,7 +26,7 @@ def test_side_memo_creat(self):
     assert compare_result, self.app_manager.assert_alert("작성된 메모가 존재하지 않습니다.") 
     
 def test_change_side_chart(self):
-    self.side_chart_page.get_side_chart()
+    self.side_chart_page.side_chart_change()
     assert (self.side_chart_page.get_comfirm_popup(), 
         self.app_manager.assert_alert("사이드 차트를 진입할 수 없습니다."))
 

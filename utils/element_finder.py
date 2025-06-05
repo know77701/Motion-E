@@ -207,6 +207,11 @@ class ElementFinder:
         return [item for item in elements if item.element_info.control_type == "Table"]
     
     @staticmethod
+    def find_table_by_auto_id(elements,auto_id):
+        return (item for item in elements if item.element_info.control_type == "Table" and
+                item.element_info.automation_id == auto_id)
+    
+    @staticmethod
     def find_combobox(elements):
         return [item for item in elements if item.element_info.control_type == "ComboBox"]
     
@@ -231,6 +236,7 @@ class ElementFinder:
         """텍스트 입력"""
         if element:
             element.set_focus()
+            element.set_text("")
             element.set_text(text)
         else:
             raise Exception(f"입력할 수 없음: {element}")

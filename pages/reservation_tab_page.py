@@ -5,8 +5,7 @@ from utils.element_finder import ElementFinder
 
 
 class ReservationTabPage:
-    def __init__(self, app_manager,user_chart_page):
-        self.app_manager = app_manager
+    def __init__(self, user_chart_page):
         self.user_chart_page = user_chart_page
         self.rsrv_panel_arr = []
         self.rsrv_edit_arr = []

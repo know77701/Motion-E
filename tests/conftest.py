@@ -3,8 +3,10 @@ import threading
 import pytest
 
 from dto.user_dto import UserDTO
+from pages.consult_tab_page import ConsultTabPage
 from pages.dashboard_page import DashBoardPage
 from pages.receive_page import ReceivePage
+from pages.reception_tab_page import ReceptionTabPage
 from pages.reservation_tab_page import ReservationTabPage
 from pages.side_chart_page import SideChartPage
 from pages.side_page import SidePage
@@ -78,8 +80,16 @@ def user_chart_page(app_manager):
     return UserChartPage(app_manager)
 
 @pytest.fixture(scope="session")
-def reservation_tab_page(app_manager, user_chart_page):
-    return ReservationTabPage(app_manager, user_chart_page)
+def reservation_tab_page(user_chart_page):
+    return ReservationTabPage(user_chart_page)
+
+@pytest.fixture(scope="session")
+def consult_tab_page(user_chart_page):
+    return ConsultTabPage(user_chart_page)
+
+@pytest.fixture(scope="session")
+def reception_tab_page(user_chart_page):
+    return ReceptionTabPage(user_chart_page)
 
 @pytest.fixture(scope="session")
 def start_event():
