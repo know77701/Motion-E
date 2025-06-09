@@ -23,12 +23,12 @@
 # 사용 기술 및 도구
 ```
 언어: Python
-사용 라이브러리: Pywinauto, pyautogui, functools, PIL
+사용 라이브러리: Pywinauto, pyautogui, PIL, pytest, pytest-order
 구조 분석 툴: InspectX
 
 Inspect 다운로드(필수아님)
 https://github.com/yinkaisheng/Python-UIAutomation-for-Windows/tree/master/inspect
-> 해당 프로그램 관리자 권한으로 실행(Motion 진입 불가)
+> 해당 프로그램 관리자 권한으로 실행(권한없이 실행 시 분석 불가)
 
 ```
 
@@ -36,7 +36,7 @@ https://github.com/yinkaisheng/Python-UIAutomation-for-Windows/tree/master/inspe
 - Motion E 설치가 되어있어야 합니다.
 1. cmd 창을 관리자권한으로 실행합니다.
 2. 해당 저장소가 저장되어있는 위치로 이동합니다.
-3. main.py 파일을 파이썬을 통해 실행합니다.
+3. pytest 를 통해 테스트를 실행시킵니다.
 
 # 디렉토리 구조
 ```
@@ -54,29 +54,46 @@ Motion-E/
 |
 ├── pages/
 |   ├── base_page.py
-|   ├── chart_page.py
+|   ├── consent_tab_page.py
+|   ├── consult_tab_page.py
 |   ├── dashboard_page.py
 |   ├── login_page.py
+|   ├── payment_tab_page.py
+|   ├── pen_chart_tab_page.py
 |   ├── receive_page.py
 |   ├── reservation_tab_page.py
 |   ├── side_chart_page.py
 |   ├── side_page.py
+|   ├── treatment_image_tabe_page.py
+|   ├── user_chart_page.py
 |   ├── user_save_page.py
 |
 ├── tests/
-|   ├── test_chart.py
-|   ├── test_dashboard_page.py
+|   ├── conftest.py
+|   ├── test_chart_util.py
+|   ├── test_consent_tab.py
+|   ├── test_consult_tab.py
+|   ├── test_dash_board_page.py
 |   ├── test_login.py
+|   ├── test_notice.py
+|   ├── test_payment_tab.py
+|   ├── test_pen_chart_tab.py
+|   ├── test_test_reception_tab.py
+|   ├── test_reception.py
+|   ├── test_reservation_tap.py
+|   ├── test_reservation.py
+|   ├── test_side_chart.py
+|   ├── test_treatment_image_tab.py
+|   ├── test_user_save.py
 | 
 ├── utils/
 |   ├── app_manager.py
 |   ├── app_screen_shot.py
 |   ├── element_finder.py
-|   ├── multi_processing.py
+|   ├── close_popup_thread.py
 |
 ├── .gitignore
 ├── README.md
-├── main.py
 ├── package-lock.json
 ├── package.json
 └── requirements.txt
