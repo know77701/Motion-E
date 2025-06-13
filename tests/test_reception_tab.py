@@ -9,4 +9,5 @@ class TestReceptionTab:
         self.side_chart_page = side_chart_page
     
     def test_save_reception(self,start_event):
+        self.reception_tab_page.get_element_list()
         return

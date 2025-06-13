@@ -14,36 +14,36 @@ class ReceptionTabPage():
     def setting(self):
         self.get_reception_tab_element_list()
         self.get_rece_panel_items()
-        self.get_rsrv_buttons()
-        self.get_rsrv_edits()
-        self.get_rsrv_comboboxes()
+        self.get_rece_buttons()
+        self.get_rece_edits()
+        self.get_rece_comboboxes()
         
     def get_reception_tab_element_list(self):
-        rcep_tab = self.user_chart_page.get_chart_field("tab")
-        if rcep_tab:
-            self.rcep_element_list_arr = ElementFinder.recursive_children(rcep_tab, 1,5)
+        rece_tab = self.user_chart_page.get_chart_field("tab")
+        if rece_tab:
+            self.rece_element_list_arr = ElementFinder.recursive_children(rece_tab, 0,10)
+            
         
-    def get_rsrv_buttons(self):
-        """예약탭 버튼 리스트 반환"""
+    def get_rece_buttons(self):
         btn_arr = []
         
-        for pane in self.rsrv_panel_arr:
+        for pane in self.rece_panel_arr:
             btn_arr.append(ElementFinder.find_buttons(pane.children()))
         self.rece_button_arr = btn_arr
 
-    def get_rsrv_edits(self):
+    def get_rece_edits(self):
         """예약탭 Edit 리스트 반환"""
         edit_arr = []
         
-        for pane in self.rsrv_panel_arr:
+        for pane in self.rece_panel_arr:
             edit_arr.append(ElementFinder.find_edits(pane.children()))
 
         self.rece_edit_arr = edit_arr
 
-    def get_rsrv_comboboxes(self):
+    def get_rece_comboboxes(self):
         """예약탭 콤보박스 리스트 반환"""
         combo_arr = []
-        for pane in self.rsrv_panel_arr:
+        for pane in self.rece_panel_arr:
             combo_arr.append(ElementFinder.find_combobox(pane.children()))
         self.rece_comboboxe_arr = combo_arr
     
@@ -57,3 +57,9 @@ class ReceptionTabPage():
                 pane_list.append(pane_items)
 
         self.rece_panel_arr = pane_list
+        
+    def get_element_list(self):
+        print(self.rece_element_list_arr)
+        print(self.rece_panel_arr)
+        print(self.rece_button_arr)
+        print(self.rece_edit_arr)
