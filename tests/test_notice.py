@@ -4,7 +4,7 @@ import time
 import pytest
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 class TestNotice():
     @pytest.fixture(autouse=True)
     def setup(self, dashboard_page, side_page, notice_context):

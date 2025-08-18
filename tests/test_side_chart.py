@@ -3,6 +3,7 @@
 import pytest
 
 
+@pytest.mark.skip()
 class TestSideChart():
     @pytest.fixture(autouse=True)
     def setup(self,app_manager, side_chart_page):

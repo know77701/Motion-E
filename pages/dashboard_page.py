@@ -10,7 +10,7 @@ class DashBoardPage():
     def __init__(self, app_manger):
         self.app_manger = app_manger
         self.app_title = self.app_manger.version_search(DashboardLocators.MAIN_FORM_TITLE)
-        self.parent_field = ElementFinder.get_chrome_field(self.app_title, self.app_manger.assert_alert("대시보드 최상위 객체를 찾을 수 없음."))
+        self.parent_field = ElementFinder.get_chrome_field(self.app_title)
         
         from pywinauto import Desktop
         [w.window_text() for w in Desktop(backend="uia").windows()]

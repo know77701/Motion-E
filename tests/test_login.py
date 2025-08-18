@@ -11,7 +11,8 @@ class TestLogin:
         """pytest가 매 테스트 전에 실행하는 setup"""
         window = app_manager.app_connect(retries=0).window(title=LoginLocators.LOGIN_FORM_TITLE)
         self.login = LoginPage(window)
-
+        
+    @pytest.mark.order(0)
     def test_login_process(self):
         """로그인 테스트"""
         self.login.hospital_info_view()
