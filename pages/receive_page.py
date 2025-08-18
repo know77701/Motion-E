@@ -7,8 +7,8 @@ from utils.element_finder import ElementFinder
 
 
 class ReceivePage:
-    def __init__(self, app_manger: AppManger):
-        self.app_manger = app_manger
+    def __init__(self, app_manager):
+        self.app_manger = app_manager
     
     def get_receive_popup_object_children(self):
         app_title = self.app_manger.version_search(ReceiveLocators.RECEIVE_POPUP_TITLE)

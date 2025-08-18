@@ -1,4 +1,5 @@
 Appium-Python-Client
 pyautogui 
-functools
 PIL
+pytest
+pytest-order

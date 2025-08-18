@@ -9,19 +9,15 @@ from pywinauto.keyboard import send_keys
 from dto.user_dto import UserDTO
 from locators.dashboard_locators import DashboardLocators
 from pages.base_page import *
-from utils.app_manager import AppManger
 from utils.element_finder import *
 
 
 class SidePage:
-    def __init__(self, app_manger : AppManger):
-        self.app_manger = app_manger
-        self.app_title = self.app_manger.version_search(DashboardLocators.MAIN_FORM_TITLE,auto_id=None)
+    def __init__(self, app_manager):
+        self.app_manager = app_manager
+        print(DashboardLocators.MAIN_FORM_TITLE)
+        self.app_title = app_manager.version_search(DashboardLocators.MAIN_FORM_TITLE,auto_id=None)
         
-    # def dashboard_reset(self):
-    #     self.base_page.dashboard_reset(self.side_window)
-    #     return
-
     def side_find_field(self, find_name):
         """사이드 영역 객체 찾기"""
         side_field = ElementFinder.get_chrome_field(self.app_title)
