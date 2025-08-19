@@ -9,4 +9,9 @@ class LoginLocators:
     YAKIHO_SAVE_BUTTON_ID = "btnSave"
     SYSTEM_CANCLE_BUTTON_ID = "Close"
     YAKIHO_VALUE = "22222222"
+
+    FRM_WAITING_BAR_TITLE = "frmWatingBar"
+    HOSPITAL_INFO_GROUP_ID = "grpHospInfo"
+    MAIN_FORM_AUTOMATION_ID = "FrmMain"
+    MAIN_FORM_TITLE = "모션.ver"
     
