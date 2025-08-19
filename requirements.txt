@@ -1,0 +1,5 @@
+Appium-Python-Client
+pyautogui 
+PIL
+pytest
+pytest-order
