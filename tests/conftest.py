@@ -27,7 +27,8 @@ class SideChartContext:
 
 class UserContext:
     def __init__(self):
-        self.user = UserDTO(chart_no=None, name=None, mobile_no=None, jno=None)
+        # Initialize with dummy data for now, actual data should be set by a test or pre-requisite
+        self.user = UserDTO(chart_no="0000002351", name="소말리", mobile_no="", jno="")
 
 class ThreadResultContext:
     def __init__(self):

@@ -1,4 +1,4 @@
-from pywinauto import Desktop, keyboard
+from pywinauto import Desktop, keyboard, mouse, timings
 from pywinauto.findwindows import ElementAmbiguousError
 
 from utils.app_manager import AppManger
@@ -232,6 +232,19 @@ class ElementFinder:
             raise Exception(f"요소를 찾을 수 없음: {element}")
 
     @staticmethod
+    def click_static_text_element(element):
+        """Static 텍스트 요소를 클릭합니다. click_input이 불가능하면 마우스 좌표를 이용합니다."""
+        if element:
+            try:
+                element.click_input()
+            except AttributeError:
+                # Fallback to mouse click if click_input is not available (e.g., for some Static elements)
+                rect = element.rectangle()
+                mouse.click(coords=(rect.left + rect.width // 2, rect.top + rect.height // 2))
+        else:
+            raise Exception(f"클릭할 요소를 찾을 수 없음: {element}")
+
+    @staticmethod
     def input_text(element, text):
         """텍스트 입력"""
         if element:
@@ -247,3 +260,30 @@ class ElementFinder:
             keyboard.send_keys(send_value)
         else:
             raise Exception(f"키 입력할 수 없음 :{send_value}" )
+
+    @staticmethod
+    def wait_for_element_visible(element, timeout=10):
+        """요소가 화면에 나타날 때까지 대기"""
+        try:
+            timings.wait_until_passes(timeout, 0.5, lambda: element.is_visible())
+            return True
+        except timings.TimeoutError:
+            return False
+
+    @staticmethod
+    def wait_for_element_enabled(element, timeout=10):
+        """요소가 활성화될 때까지 대기"""
+        try:
+            timings.wait_until_passes(timeout, 0.5, lambda: element.is_enabled())
+            return True
+        except timings.TimeoutError:
+            return False
+
+    @staticmethod
+    def wait_for_element_not_visible(element, timeout=10):
+        """요소가 화면에서 사라질 때까지 대기"""
+        try:
+            timings.wait_until_passes(timeout, 0.5, lambda: not element.is_visible())
+            return True
+        except timings.TimeoutError:
+            return False

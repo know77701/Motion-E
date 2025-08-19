@@ -4,7 +4,8 @@ import time
 from datetime import datetime
 
 import pyautogui
-from pywinauto import Desktop, application
+from pywinauto import Desktop, application, timings
+from pywinauto.findwindows import ElementNotFoundError
 
 from locators.chart_locators import ChartLocators
 from locators.login_locators import LoginLocators
@@ -21,6 +22,7 @@ class AppManger:
         self.backend = "uia"
         self.motion_app = application.Application(backend=self.backend)
         
+        self.is_admin = self.check_admin()
    
     def version_search(self, search_title=None, auto_id=None):
         """특정 윈도우 프로세스 확인용"""
@@ -43,62 +45,97 @@ class AppManger:
                 print("버전 찾기 실패", e)
                 window_screen_shot("version_search_fail")
                 
-    def login_form_connect(self, retries = 0):
-        if retries <= 3:
-            app = self.win32_app.connect(title=LoginLocators.LOGIN_FORM_TITLE)
-            
-            if app:    
+    def login_form_connect(self, retries = 3, interval = 1):
+        for i in range(retries):
+            try:
+                app = self.win32_app.connect(title=LoginLocators.LOGIN_FORM_TITLE)
                 app.top_window().set_focus()
                 return app
-            else:
-                return self.login_form_connect(retries + 1)
+            except ElementNotFoundError:
+                print(f"로그인 창을 찾을 수 없습니다. 재시도 중... ({i+1}/{retries})")
+                time.sleep(interval)
+        print("로그인 창 연결에 실패했습니다.")
+        return None
             
-    def motion_app_connect(self, retries = 0):
-        if retries <= 3:
+    def motion_app_connect(self, retries = 3, interval = 1):
+        for i in range(retries):
             version_text = self.version_search(UtilLocators.MOTION_VERSION_TITLE, auto_id=None)
             if version_text:
-                app = self.motion_app.connect(title=version_text)
-                app.top_window().set_focus()
-                return app
+                try:
+                    app = self.motion_app.connect(title=version_text)
+                    app.top_window().set_focus()
+                    return app
+                except ElementNotFoundError:
+                    print(f"모션 앱에 연결할 수 없습니다. 재시도 중... ({i+1}/{retries})")
+                    time.sleep(interval)
             else:
-                return self.motion_app_connect(retries + 1)
+                print(f"모션 앱 버전 창을 찾을 수 없습니다. 재시도 중... ({i+1}/{retries})")
+                time.sleep(interval)
+        print("모션 앱 연결에 실패했습니다.")
+        return None
                 
     def receive_connect(self):
         if self.version_search(ReceiveLocators.RECEIVE_POPUP_TITLE, auto_id=None):
-            return self.motion_app_connect(self.motion_app)
+            return self.motion_app_connect()
+        return None
         
     def chart_connect(self):
         if self.version_search(search_title=None, auto_id=ChartLocators.CHART_AUTO_ID):
-            return self.motion_app_connect(self.motion_app)
+            return self.motion_app_connect()
+        return None
     
-    def app_connect(self, retries=0):
-        try:
-            if self.version_search(UtilLocators.MOTION_VERSION_TITLE, auto_id=None):
-                return self.motion_app_connect()
-            elif self.version_search(LoginLocators.LOGIN_FORM_TITLE, auto_id=None):
-                return self.login_form_connect()
-            else:
+    def app_connect(self, retries=3, interval=1):
+        for i in range(retries):
+            try:
+                # Case 1: Motion application is already running
+                if self.version_search(UtilLocators.MOTION_VERSION_TITLE, auto_id=None):
+                    print("모션 앱이 이미 실행 중입니다. 연결 시도...")
+                    connected_app = self.motion_app_connect()
+                    if connected_app: return connected_app
+
+                # Case 2: Login form is visible (application might be running, but main window not yet)
+                if self.version_search(LoginLocators.LOGIN_FORM_TITLE, auto_id=None):
+                    print("로그인 폼이 감지되었습니다. 연결 시도...")
+                    connected_app = self.login_form_connect()
+                    if connected_app: return connected_app
+
+                # Case 3: Application is not running, start it
+                print(f"애플리케이션이 실행 중이지 않습니다. 시작 시도... ({i+1}/{retries})")
                 self.win32_app.start(UtilLocators.APP_PATH)
-                time.sleep(3)
-                return self.login_form_connect()
                 
-        except application.ProcessNotFoundError as e:
-            print("앱 찾기 실패 :", e)
-            if retries < 3:
-                retries += 1
-                print(f"재시도 횟수: {retries}")
-                self.app_connect(retries)
-            else:
-                window_screen_shot("app_connect_fail")
-                print("최대 재시도 횟수에 도달했습니다. 프로그램을 종료합니다.")
-        except application.AppStartError:
-            print("앱 미설치 또는 앱 미존재")
+                # Wait for the login window to appear explicitly
+                try:
+                    login_window = self.win32_app.window(title=LoginLocators.LOGIN_FORM_TITLE)
+                    timings.wait_until_passes(30, 0.5, lambda: login_window.is_visible())
+                    login_window.set_focus()
+                    return self.login_form_connect() # Try to connect after start and wait
+                except ElementNotFoundError:
+                    print("로그인 창이 예상 시간 내에 나타나지 않았습니다.")
+                    time.sleep(interval) # Wait before next retry
+                    continue
+
+            except application.ProcessNotFoundError as e:
+                print(f"앱 프로세스 찾기 실패: {e}. 재시도 중... ({i+1}/{retries})")
+                time.sleep(interval) # Wait before next retry
+                continue
+            except application.AppStartError:
+                print("앱 미설치 또는 앱 미존재.")
+                return None # Fatal error, cannot start app
+            except Exception as e:
+                print(f"예기치 않은 오류 발생: {e}. 재시도 중... ({i+1}/{retries})")
+                time.sleep(interval) # Wait before next retry
+                continue
+        
+        print("애플리케이션 연결 및 시작에 실패했습니다. 최대 재시도 횟수에 도달했습니다.")
+        window_screen_shot("app_connect_fail")
+        return None
         
     def check_admin(self):
         if not ctypes.windll.shell32.IsUserAnAdmin():
             ctypes.windll.shell32.ShellExecuteW(
                 None, "runas", sys.executable, ' '.join(sys.argv), None, 1)
             sys.exit()
+        return True
             
     def mobile_number_change_fromat(self, mobile_no):
         """모바일 번호 형식 맞추기"""
