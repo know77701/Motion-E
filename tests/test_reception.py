@@ -6,7 +6,7 @@ import pytest
 from dto.user_dto import UserDTO
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 class TestReception():
     @pytest.fixture(autouse=True)
     def setup(self,side_page, dashboard_page, save_user_ctx):

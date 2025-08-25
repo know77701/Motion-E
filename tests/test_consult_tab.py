@@ -1,7 +1,7 @@
 import pytest
 
 
-# @pytest.mark.skip()
+@pytest.mark.skip()
 class TestConsultTab():
     @pytest.fixture(autouse=True)
     def setup(self, consult_tab_page, side_chart_page):

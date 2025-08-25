@@ -6,7 +6,7 @@ from dto.user_dto import UserDTO
 from utils.element_finder import ElementFinder
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 class TestReservation():
     @pytest.fixture(autouse=True)
     def setup(self,side_page, dashboard_page, save_user_ctx):

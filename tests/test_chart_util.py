@@ -1,8 +1,7 @@
-
 import pytest
 
 
-@pytest.mark.skip(reason="유틸 함수 추가 후 테스트 진행예정")
+# @pytest.mark.skip(reason="유틸 함수 추가 후 테스트 진행예정")
 @pytest.mark.order(11)
 def test_compare_chart_user_info(app_manager, user_chart_page,save_user_ctx):
     user = save_user_ctx.user

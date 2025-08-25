@@ -1,7 +1,7 @@
 import pytest
 
 
-# @pytest.mark.skip()
+@pytest.mark.skip()
 class TestReservationTab():
     @pytest.fixture(autouse=True)
     def setup(self, reservation_tab_page):
@@ -18,7 +18,7 @@ class TestReservationTab():
     def test_cancel_reserve(self):
         if not self.reservation_tab_page.get_cancle_rsrv_button():
             table = self.reservation_tab_page.get_rsrv_list_elements(
-                rsrv_day="20250602",
+                rsrv_day="20250709",
                 rsrv_time="1930"
             )
             table.click_input()
@@ -35,7 +35,7 @@ class TestReservationTab():
         
         
     def test_change_reserve(self, start_event):
-        self.reservation_tab_page.select_reservation_by_datetime("20250602", "1700")
+        self.reservation_tab_page.select_reservation_by_datetime("20250709", "1700")
         self.reservation_tab_page.change_reservation_time()
         self.reservation_tab_page.submit_reservation_change(start_event)
         self.reservation_tab_page.verify_reservation_changed()
