@@ -1,331 +1,211 @@
-import random
-import re
-
+from pages.base_page import BasePage
+from pages.user_chart_page import UserChartPage
 from utils.element_finder import ElementFinder
+from locators.util_locators import UtilLocators
+from pywinauto import Desktop
+import logging
+from pywinauto.controls import uia_controls
 
 
-class ReservationTabPage:
-    def __init__(self, user_chart_page):
+class ReservationTabPage(BasePage):
+    def __init__(self, user_chart_page: UserChartPage):
+        super().__init__(user_chart_page.app, user_chart_page.app_manager)
         self.user_chart_page = user_chart_page
-        self.rsrv_panel_arr = []
-        self.rsrv_edit_arr = []
-        self.rsrv_button_arr = []
-        self.rsrv_comboboxe_arr = []
-        self.rsrv_element_list_arr = []
-        self.select_rsrv_random_time = None
-        self.select_rsrv_day = None
-        self.setting()
-    
-    def setting(self):
-        """
-            초기화 함수
-        """
-        self.get_reservation_tab_element_list()
-        self.get_rsrv_panel_items()
-        self.get_rsrv_buttons()
-        self.get_rsrv_edits()
-        self.get_rsrv_comboboxes()
-    
-    def get_reservation_tab_element_list(self):
-        """예약 탭 최상위 객체 반환"""
-        rsrv_tab = self.user_chart_page.get_chart_field("tab")
-        if rsrv_tab:
-            self.rsrv_element_list_arr = ElementFinder.recursive_children(rsrv_tab, 1,5)
-    
-    def get_rsrv_panel_items(self):
-        """예약탭 Pane 하위 항목 리스트 반환"""
-        pane_list = []
-        
-        for items in self.rsrv_element_list_arr:
-            pane_items = ElementFinder.find_pane_by_auto_id(items.children(), "radPanel1")
-            
-            if pane_items:
-                pane_list.append(pane_items)
 
-        self.rsrv_panel_arr = pane_list
-    
-    def get_rsrv_buttons(self):
-        """예약탭 버튼 리스트 반환"""
-        btn_arr = []
-        
-        for pane in self.rsrv_panel_arr:
-            btn_arr.append(ElementFinder.find_buttons(pane.children()))
-        self.rsrv_button_arr = btn_arr
+    def some_reservation_method(self):
+        # Placeholder for future implementation
+        pass
 
+    def connect_to_beauty_chart_form(self):
+        return self.app_manager.connect_to_tbeauty_chart_form()
 
-    def get_rsrv_edits(self):
-        """예약탭 Edit 리스트 반환"""
-        edit_arr = []
-        
-        for pane in self.rsrv_panel_arr:
-            edit_arr.append(ElementFinder.find_edits(pane.children()))
+    def select_reservation_tab(self):
+        # 최상위 애플리케이션 윈도우를 가져옵니다.
+        main_window_title = self.app_manager.version_search(UtilLocators.MOTION_VERSION_TITLE)
+        main_window = Desktop(backend="uia").window(title=main_window_title)
+        logging.info(f"메인 윈도우: {main_window.window_text()} (AutomationId: {main_window.automation_id()})")
 
-        self.rsrv_edit_arr = edit_arr
+        # tBeautyChartForm에 먼저 연결합니다.
+        tbeauty_chart_form_window = self.connect_to_beauty_chart_form()
+        if tbeauty_chart_form_window is None:
+            logging.error("tBeautyChartForm 윈도우를 찾을 수 없습니다.")
+            raise Exception("tBeautyChartForm 윈도우를 찾을 수 없습니다.")
+        logging.info(f"tBeautyChartForm 윈도우: {tbeauty_chart_form_window.window_text()} (AutomationId: {tbeauty_chart_form_window.automation_id()})")
 
-    def get_rsrv_comboboxes(self):
-        """예약탭 콤보박스 리스트 반환"""
-        combo_arr = []
-        for pane in self.rsrv_panel_arr:
-            combo_arr.append(ElementFinder.find_combobox(pane.children()))
-        self.rsrv_comboboxe_arr = combo_arr
-    
-    def get_rsrv_timetable_wrapper(self):
-        """
-            타임테이블 상위객체 추출 함수
-        """
-        for panel in self.rsrv_panel_arr:
-            return ElementFinder.find_pane_by_auto_id(panel.children(), "panel30")
-    
-    def get_rsrv_timetable_elements(self):
-        """
-            예약 타임테이블 리스트 추출 함수
-        """
-        timetable_wrapper = self.get_rsrv_timetable_wrapper()
-        wrapper_list = ElementFinder.recursive_children_with_control_type(timetable_wrapper, "Pane", 0, 2)
-        timetalbe = ElementFinder.find_pane_by_auto_id(wrapper_list, "panel1")
-        if timetalbe:
-            return timetalbe
+        # 디버깅을 위해 tBeautyChartForm 윈도우의 모든 하위 컨트롤의 속성을 출력합니다.
+        # logging.info("tBeautyChartForm 윈도우의 하위 컨트롤:")
+        # for i, child in enumerate(ElementFinder.recursive_children(tbeauty_chart_form_window, depth=0, max_depth=5)):
+        #     logging.info(f"  [{i}] Name: {child.element_info.name}, ControlType: {child.element_info.control_type}, AutomationId: {child.element_info.automation_id}")
+
+        # "예약" 탭 아이템을 automation_id, name, control_type으로 정확하게 찾아 클릭
+        reservation_tab_item = ElementFinder.find_child_by_attributes(
+            tbeauty_chart_form_window,
+            automation_id="tabModules", # 원래의 automation_id로 복구
+            name=" 예약", # 이름 앞에 공백 포함하여 검색
+            control_type="Tab" # ControlType을 Tab으로 복구
+        )
+
+        if reservation_tab_item:
+            logging.info(f"'예약' 탭 아이템 찾음: (Name: {reservation_tab_item.element_info.name}, ControlType: {reservation_tab_item.element_info.control_type}, AutomationId: {reservation_tab_item.element_info.automation_id})")
+            # ElementFinder.click(reservation_tab_item) # 일반 클릭 대신 TabControlWrapper에 적합한 click_input 사용
+            reservation_tab_item.click_input() # TabControlWrapper는 click_input()으로 탭 선택
+            logging.info("예약 탭 아이템을 선택했습니다.")
         else:
-            return None
-        
-    def get_rsrv_list_table(self, auto_id):
-        """예약탭 테이블 리스트 반환"""
-        table_arr = []
-        list_items = self.rsrv_element_list_arr
-        for items in list_items:
-            table_items = ElementFinder.find_tables(items.children())
-            if table_items:
-                table_arr.extend(table_items)
+            logging.error("'예약' 탭 아이템을 찾을 수 없습니다.")
+            raise Exception("'예약' 탭 아이템을 찾을 수 없습니다.")
 
-        return ElementFinder.find_list_items_by_auto_id(table_arr, auto_id)
-    
-    def get_forward_memo_edit(self):
-        """
-            전달 메모 입력폼 리턴 함수
-        """
-        return self.rsrv_edit_arr[0][0]
-    
-    def get_rsrv_memo_edit(self):
-        """
-            예약 메모 입력폼 리턴 함수
-        """
-        return self.rsrv_edit_arr[0][1]
-    
-    def get_rsrv_day_edit(self):
-        """
-            예약일 리턴 함수
-        """
-        return ElementFinder.find_edit_by_automation_id(self.rsrv_edit_arr[0], "txtRsrvDd")
+    def find_rad_panel_main_panel_children(self):
+        tbeauty_chart_form_window = self.connect_to_beauty_chart_form()
+        if tbeauty_chart_form_window is None:
+            logging.error("tBeautyChartForm 윈도우를 찾을 수 없습니다.")
+            raise Exception("tBeautyChartForm 윈도우를 찾을 수 없습니다.")
 
-    def get_rsrv_time_edit(self):
-        """
-            예약 시간 리턴 함수
-        """
-        return ElementFinder.find_edit_by_automation_id(self.rsrv_edit_arr[0], "txtRsrvTm")
-    
-    def get_rsrv_status_edit(self):
-        """
-            예약 상태 리턴 함수
-        """
-        return ElementFinder.find_edit_by_automation_id(self.rsrv_edit_arr[0], "txtRsrvPrgrStat")
-        
-    def get_calendar_button(self):
-        """
-            캘린더 버튼 추출 함수
-        """
-        return self.rsrv_button_arr[0][1]
+        rad_panel_main_panel = ElementFinder.find_child_by_attributes(
+            tbeauty_chart_form_window,
+            automation_id="radPanelMainPanel",
+            control_type="Pane"
+        )
 
-    def get_today_button(self):
-        """
-            캘린더 오늘 버튼 리턴
-        """
-        return ElementFinder.find_button_by_name(self.rsrv_button_arr[0], "오늘")
-
-    def get_remove_content_rsrv_button(self):
-        """
-            내용 지우기 버튼 리턴
-        """
-        return ElementFinder.find_button_by_name(self.rsrv_button_arr[0], "내용 지우기")
-
-    def get_change_rsrv_button(self):
-        """
-            예약변경 버튼 리턴
-        """
-        return ElementFinder.find_button_by_name(self.rsrv_button_arr[0], "예약 변경")
-
-    def get_new_rsrv_button(self):
-        """
-            신규예약 버튼 리턴        
-        """
-        return ElementFinder.find_button_by_name(self.rsrv_button_arr[0], "신규 예약")
-
-    def get_cancle_rsrv_button(self):
-        """
-            예약취소 버튼 리턴
-        """
-        return ElementFinder.find_button_by_name(self.rsrv_button_arr[0], "예약 취소")
-    
-    def get_rsrv_timetable(self):
-        """예약 설정 타임테이블 반환"""
-        return self.get_rsrv_list_table("calRsrv")
-    
-    def get_rsrv_list(self):
-        """예약 리스트 반환"""
-        return self.get_rsrv_list_table("gvRsrv")
-    
-    def get_ticket_list(self):
-        """예약탭 티켓팅 반환"""
-        return self.get_rsrv_list_table("gvMoprTicket")
-    
-    def rsrv_random_time_select(self):
-        """
-            타임테이블 랜덤 값 선택
-        """
-        timetbale_list = self.get_rsrv_timetable_elements()
-        self.select_rsrv_random_time = random.choice(timetbale_list.children())
-        if self.select_rsrv_random_time:
-            self.select_rsrv_random_time.click_input()
-            return self.select_rsrv_random_time
+        if rad_panel_main_panel:
+            logging.info(f"'radPanelMainPanel' Pane 찾음: (Name: {rad_panel_main_panel.element_info.name}, ControlType: {rad_panel_main_panel.element_info.control_type}, AutomationId: {rad_panel_main_panel.element_info.automation_id})")
+            logging.info("'radPanelMainPanel'의 하위 컨트롤:")
+            children = []
+            for i, child in enumerate(ElementFinder.recursive_children(rad_panel_main_panel, depth=0, max_depth=5)):
+                children.append(child)
+                logging.info(f"  [{i}] Name: {child.element_info.name}, ControlType: {child.element_info.control_type}, AutomationId: {child.element_info.automation_id}")
+            return children
         else:
-            raise Exception("타임테이블 클릭 실패 확인 필요")
-    
-    def select_rsrv_time_verify(self):
-        """
-            랜덤 타임테이블 선택 값 비교
-        """
-        edit_time = self.get_rsrv_time_edit()
-        edit_day = self.get_rsrv_day_edit()
+            logging.error("'radPanelMainPanel' Pane을 찾을 수 없습니다.")
+            raise Exception("'radPanelMainPanel' Pane을 찾을 수 없습니다.")
 
-        if edit_time:
-            edit_time_str = re.sub(r"[^\d]", "", edit_time.element_info.name)
+    def find_rad_panel1_pane(self):
+        tbeauty_chart_form_window = self.connect_to_beauty_chart_form()
+        if tbeauty_chart_form_window is None:
+            logging.error("tBeautyChartForm 윈도우를 찾을 수 없습니다.")
+            raise Exception("tBeautyChartForm 윈도우를 찾을 수 없습니다.")
 
-        if self.select_rsrv_random_time:
-            selected_time_str = re.sub(r"[^\d]", "", self.select_rsrv_random_time.element_info.name)
+        rad_panel1 = ElementFinder.find_child_by_attributes(
+            tbeauty_chart_form_window,
+            automation_id="radPanel1",
+            control_type="Pane"
+        )
 
-        if edit_time_str == selected_time_str:
-            self.select_rsrv_random_time = selected_time_str
-            self.select_rsrv_day = re.sub(r"[^\d]", "", edit_day.element_info.name)
-            return True
+        if rad_panel1:
+            logging.info(f"'radPanel1' Pane 찾음: (Name: {rad_panel1.element_info.name}, ControlType: {rad_panel1.element_info.control_type}, AutomationId: {rad_panel1.element_info.automation_id})")
+            return rad_panel1
         else:
-            return False
-    
-    def rsrv_time_setting(self):
-        """
-            예약 랜덤 시간 세팅 및 선택 시간 입력여부 확인
-        """
-        select_result = False
+            logging.error("'radPanel1' Pane을 찾을 수 없습니다.")
+            raise Exception("'radPanel1' Pane을 찾을 수 없습니다.")
 
-        while not select_result:
-            self.rsrv_random_time_select()
-            if self.select_rsrv_time_verify():
-                select_result = True
-    
-    def get_rsrv_list_elements(self, rsrv_day, rsrv_time):
-        """
-            예약리스트 시간 비교 후 배열 반환
-        """
-        rsrv_list = self.get_rsrv_list()
+    def find_panel30_pane(self):
+        tbeauty_chart_form_window = self.connect_to_beauty_chart_form()
+        if tbeauty_chart_form_window is None:
+            logging.error("tBeautyChartForm 윈도우를 찾을 수 없습니다.")
+            raise Exception("tBeautyChartForm 윈도우를 찾을 수 없습니다.")
 
-        for list_items in rsrv_list.children():
-            day_found = False
-            time_found = False
+        panel30 = ElementFinder.find_child_by_attributes(
+            tbeauty_chart_form_window,
+            automation_id="panel30",
+            control_type="Pane"
+        )
 
-            for items in list_items.children():
-                items.set_focus()
-                raw = re.sub(r"[^\d]", "", items.element_info.name)
-                number_str = raw[1:] if len(raw) > 1 else ""
-
-                if number_str == rsrv_day:
-                    day_found = True
-                if number_str == rsrv_time:
-                    time_found = True
-
-            if day_found and time_found:
-                return list_items
-        
-    def get_rsrv_list_time(self):
-        """
-            예약리스트 날짜 및 시간 추출 함수
-        """
-        rsrv_arr = []
-        temp_pair = []
-        rsrv_list = self.get_rsrv_list()
-        rsrv_list_items = ElementFinder.recursive_children(rsrv_list, 0, 2)
-        
-        for el in rsrv_list_items:
-            el.set_focus()
-            raw = re.sub(r"[^\d]", "", el.element_info.name)
-            trimmed = raw[1:] if len(raw) > 1 else ""
-            if trimmed:
-                temp_pair.append(trimmed)
-                if len(temp_pair) == 2:
-                    rsrv_arr.append(temp_pair)
-                    temp_pair = []
-        return rsrv_arr
-    
-    def verify_rsrv_list(self):
-        """
-            예약리스트 시간 비교 함수
-        """
-        arr = self.get_rsrv_list_time()
-        found = any(self.select_rsrv_day in item and self.select_rsrv_random_time in item for item in arr)
-        if found:
-            return True
+        if panel30:
+            logging.info(f"'panel30' Pane 찾음: (Name: {panel30.element_info.name}, ControlType: {panel30.element_info.control_type}, AutomationId: {panel30.element_info.automation_id})")
+            return panel30
         else:
-            return False
-    
-    def _write_rsrv_memo_(self, content):
-        """
-            예약메모 작성 함수
-        """
-        edit = self.get_rsrv_memo_edit()
-        edit.set_focus()
-        edit.set_text("")
-        edit.set_text(content)
-    
-    def _write_forward_memo_(self, content):
-        """
-            전달메모 작성 함수
-        """        
-        edit = self.get_forward_memo_edit()
-        edit.set_focus()
-        edit.set_text("")
-        edit.set_text(content)
-    
-    def get_rsrv_cancle_popup(self):
-        """
-            예약 취소 팝업 리턴 함수
-        """
-        cancle_popup = self.user_chart_page.get_rsrv_cancel_popup() 
-        print(cancle_popup)
-        return
-    
-    def select_reservation_by_datetime(self, day: str, time: str):
-        if not self.get_cancle_rsrv_button():
-            table = self.get_rsrv_list_elements(rsrv_day=day, rsrv_time=time)
-            assert table, "선택할 예약이 존재하지 않습니다."
-            table.click_input()
-            
-            assert self.get_rsrv_day_edit(), "예약 날짜 필드 없음"
-            assert self.get_rsrv_time_edit(), "예약 시간 필드 없음"
-            self.get_rsrv_buttons()
+            logging.error("'panel30' Pane을 찾을 수 없습니다.")
+            raise Exception("'panel30' Pane을 찾을 수 없습니다.")
+
+    def find_rad_scrollable_panel3_pane(self):
+        tbeauty_chart_form_window = self.connect_to_beauty_chart_form()
+        if tbeauty_chart_form_window is None:
+            logging.error("tBeautyChartForm 윈도우를 찾을 수 없습니다.")
+            raise Exception("tBeautyChartForm 윈도우를 찾을 수 없습니다.")
+
+        rad_scrollable_panel3 = ElementFinder.find_child_by_attributes(
+            tbeauty_chart_form_window,
+            automation_id="radScrollablePanel3",
+            control_type="Pane" # ControlType은 'Pane'으로 가정합니다.
+        )
+
+        if rad_scrollable_panel3:
+            logging.info(f"'radScrollablePanel3' Pane 찾음: (Name: {rad_scrollable_panel3.element_info.name}, ControlType: {rad_scrollable_panel3.element_info.control_type}, AutomationId: {rad_scrollable_panel3.element_info.automation_id})")
+            return rad_scrollable_panel3
+        else:
+            logging.error("'radScrollablePanel3' Pane을 찾을 수 없습니다.")
+            raise Exception("'radScrollablePanel3' Pane을 찾을 수 없습니다.")
+
+    def find_panel1_pane(self):
+        tbeauty_chart_form_window = self.connect_to_beauty_chart_form()
+        if tbeauty_chart_form_window is None:
+            logging.error("tBeautyChartForm 윈도우를 찾을 수 없습니다.")
+            raise Exception("tBeautyChartForm 윈도우를 찾을 수 없습니다.")
+
+        panel1 = ElementFinder.find_child_by_attributes(
+            tbeauty_chart_form_window,
+            automation_id="panel1",
+            control_type="Pane"
+        )
+
+        if panel1:
+            logging.info(f"'panel1' Pane 찾음: (Name: {panel1.element_info.name}, ControlType: {panel1.element_info.control_type}, AutomationId: {panel1.element_info.automation_id})")
+            return panel1
+        else:
+            logging.error("'panel1' Pane을 찾을 수 없습니다.")
+            raise Exception("'panel1' Pane을 찾을 수 없습니다.")
+
+    def find_panel1_children_automation_ids(self):
+        panel1_pane = self.find_panel1_pane()
+        if panel1_pane is None:
+            logging.error("'panel1' Pane을 찾을 수 없습니다.")
+            raise Exception("'panel1' Pane을 찾을 수 없습니다.")
+
+        logging.info("'panel1' Pane의 하위 AutomationId 탐색 시작")
+        children_automation_ids = []
+        for i, child in enumerate(ElementFinder.recursive_children(panel1_pane, depth=0, max_depth=5)):
+            if child.element_info.automation_id:
+                children_automation_ids.append(child.element_info.automation_id)
+                logging.info(f"  [{i}] 하위 요소 AutomationId: {child.element_info.automation_id}")
+        return children_automation_ids
+
+    def get_panel1_children_details(self):
+        panel1_pane = self.find_panel1_pane()
+        if panel1_pane is None:
+            logging.error("'panel1' Pane을 찾을 수 없습니다.")
+            raise Exception("'panel1' Pane을 찾을 수 없습니다.")
+
+        logging.info("'panel1' Pane의 하위 요소 상세 정보 탐색 시작")
+        children_details = []
+        for i, child in enumerate(ElementFinder.recursive_children(panel1_pane, depth=0, max_depth=5)):
+            detail = {
+                "automation_id": child.element_info.automation_id,
+                "name": child.element_info.name,
+                "control_type": child.element_info.control_type
+            }
+            children_details.append(detail)
+            logging.info(f"  [{i}] AutomationId: {child.element_info.automation_id}, Name: {child.element_info.name}, ControlType: {child.element_info.control_type}")
+        return children_details
+
+    def find_checkboxes_by_control_type(self):
+        tbeauty_chart_form_window = self.connect_to_beauty_chart_form()
+        if tbeauty_chart_form_window is None:
+            logging.error("tBeautyChartForm 윈도우를 찾을 수 없습니다.")
+            raise Exception("tBeautyChartForm 윈도우를 찾을 수 없습니다.")
+
+        logging.info("ControlType이 'CheckBox'인 요소 탐색 시작")
+        all_children = ElementFinder.recursive_children(tbeauty_chart_form_window, depth=0, max_depth=5)
         
-    def prepare_new_reservation(self,rsrv_memo, forward_memo):
-        if self.get_change_rsrv_button():
-            self.get_new_rsrv_button().click()
-        
-        self._write_forward_memo_(rsrv_memo)
-        self._write_forward_memo_(forward_memo)
-        assert self.rsrv_time_setting(), "예약시간을 선택하지 못했습니다."
-    
-    def change_reservation_time(self):
-        self.rsrv_time_setting()
-    
-    def submit_reservation_change(self, start_event):
-        change_btn = self.get_change_rsrv_button()
-        if change_btn:
-            start_event.set()
-            change_btn.click()
-            
-    def verify_reservation_changed(self):
-        assert not self.verify_rsrv_list(), "예약이 변경되지 않았습니다."
+        checkbox_elements = [
+            child for child in all_children
+            if child.element_info.control_type == "CheckBox"
+        ]
+
+        if checkbox_elements:
+            logging.info(f"ControlType이 'CheckBox'인 요소 {len(checkbox_elements)}개 발견:")
+            for i, element in enumerate(checkbox_elements):
+                logging.info(f"  [{i}] AutomationId: {element.element_info.automation_id}, Name: {element.element_info.name}, ControlType: {element.element_info.control_type}")
+            return checkbox_elements
+        else:
+            logging.error("ControlType이 'CheckBox'인 요소를 찾을 수 없습니다.")
+            return []
+

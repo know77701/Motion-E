@@ -1,4 +1,5 @@
 import threading
+import logging
 
 import pytest
 
@@ -15,6 +16,15 @@ from pages.user_save_page import UserSavePage
 from utils.app_manager import AppManger
 from utils.close_popup_thread import ClosePopupThread
 
+# 로그 설정
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("test_reservation_tab.log", mode='w'), # 로그 파일을 test_reservation_tab.log로 지정, 매번 새로 생성
+        logging.StreamHandler() # 콘솔에도 출력
+    ]
+)
 
 class NoticeContext:
     def __init__(self):
@@ -52,9 +62,10 @@ def thread_result():
 
 @pytest.fixture(scope="session")
 def app_manager():
-    app = AppManger()
-    app.check_admin()
-    return app
+    app_mgr = AppManger()
+    app_mgr.motion_app_connect_and_login() # Ensure app is connected and logged in
+    yield app_mgr
+    # Teardown: You might want to close the application here if needed
 
 @pytest.fixture(scope="session")
 def dashboard_page(app_manager):
@@ -78,7 +89,7 @@ def side_chart_page(app_manager,user_chart_page):
 
 @pytest.fixture(scope="session")
 def user_chart_page(app_manager):
-    return UserChartPage(app_manager)
+    return UserChartPage(app_manager.current_app, app_manager)
 
 @pytest.fixture(scope="session")
 def reservation_tab_page(user_chart_page):

@@ -4,9 +4,11 @@ from utils.element_finder import ElementFinder
 
 
 class UserChartPage:
-    def __init__(self, app_manager):
+    def __init__(self, app, app_manager):
+        self.app = app
         self.app_manager = app_manager
-        self.app_title = self.app_manager.version_search(auto_id="tBeautyChartForm")
+        tbeauty_chart_form_text = self.app_manager.version_search(auto_id="tBeautyChartForm")
+        self.app_title = tbeauty_chart_form_text if tbeauty_chart_form_text else ""
         self.parent_field = ElementFinder.get_user_chart_parent_field(self.app_title)
 
     def get_rsrv_cancel_popup(self):

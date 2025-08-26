@@ -12,6 +12,9 @@ class BasePage:
         self.app = app
         self.app_manager = app_manager
 
+    def find_element_by_automation_id(self, automation_id: str):
+        return ElementFinder.find_element(self.app.top_window(), auto_id=automation_id)
+
     def dashboard_reset(self, window):
         compare_window = window.children()
 

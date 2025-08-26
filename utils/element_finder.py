@@ -1,5 +1,6 @@
 from pywinauto import Desktop, keyboard, mouse, timings
 from pywinauto.findwindows import ElementAmbiguousError
+from pywinauto.controls import uia_controls
 
 from utils.app_manager import AppManger
 
@@ -59,7 +60,7 @@ class ElementFinder:
     @staticmethod
     def get_user_chart_parent_field(app_title):
         return ElementFinder.get_chart_field(
-            app_title, lambda msg="차트가 열려있지 않습니다.": AppManger.appassert_alert(msg)
+            app_title, lambda msg="차트가 열려있지 않습니다.": AppManger.assert_alert(msg)
         )
     
     @staticmethod        
@@ -78,10 +79,16 @@ class ElementFinder:
     def get_chart_field(app_title, assert_alert):
         """차트 상위 필드 객체 가져오기"""
         try:
+            if app_title is None:
+                raise ElementNotFoundError("App title is None. Cannot find chart field.")
             side_window = Desktop(backend="uia").window(title=app_title)
             pane_list = ElementFinder.find_pane(side_window.children())
             return ElementFinder.find_pane_by_auto_id(pane_list[0].children(), "pnlRightAll")
         except ElementAmbiguousError:
+            assert_alert("차트가 열려있지 않습니다.")
+            return None
+        except Exception as e:
+            print(f"Error in get_chart_field: {e}")
             assert_alert("차트가 열려있지 않습니다.")
             return None
 
@@ -223,6 +230,32 @@ class ElementFinder:
     def find_element(element_window, auto_id=None, class_name=None, control_type=None, title=None):
         return element_window.child_window(auto_id=auto_id, class_name=class_name, control_type=control_type, title=title)
     
+    @staticmethod
+    def find_child_by_attributes(parent_element, name=None, control_type=None, automation_id=None, localized_control_type=None, depth=0, max_depth=5):
+        if depth > max_depth:
+            return None
+
+        for child in parent_element.children():
+            match = True
+            if name is not None and child.element_info.name != name:
+                match = False
+            if control_type is not None and child.element_info.control_type != control_type:
+                match = False
+            if automation_id is not None and child.element_info.automation_id != automation_id:
+                match = False
+            if localized_control_type is not None and child.element_info.localized_control_type != localized_control_type:
+                match = False
+
+            if match:
+                return child
+
+            found_child = ElementFinder.find_child_by_attributes(
+                child, name, control_type, automation_id, localized_control_type, depth + 1, max_depth
+            )
+            if found_child:
+                return found_child
+        return None
+
     @staticmethod
     def click(element):
         """클릭 액션"""

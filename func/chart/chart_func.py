@@ -4,6 +4,7 @@ import time
 from pywinauto.controls.hwndwrapper import HwndWrapper
 import datetime
 import pyautogui
+from locators.dashboard_locators import DashboardLocators
 
 
 class ChartFunc():
@@ -316,7 +317,6 @@ class ChartFunc():
             return
         if depth == index_number:
             ChartFunc.explore_child_list.append(element)
-        # print(f"{depth} level = {element}")
         for child in element.children():
             ChartFunc.explore_children(
                 child, depth + 1, max_depth, index_number=index_number)
@@ -470,6 +470,24 @@ class ChartFunc():
     def rsrv_create():
         return 
     
+    def select_random_time_from_calendar_reservation():
+        print("캘린더 예약 시간 테이블에서 무작위 시간 선택 시작")
+        cal_rsrv_table = ChartFunc.return_window(auto_id=DashboardLocators.CALENDAR_RESERVATION_TABLE_AUTO_ID)
+        
+        if cal_rsrv_table:
+            ChartFunc.explore_child_list = []
+            ChartFunc.explore_children(cal_rsrv_table, depth=0, max_depth=5, index_number=4)
+            
+            if ChartFunc.explore_child_list:
+                random_time_element = random.choice(ChartFunc.explore_child_list)
+                print(f"선택된 시간: {random_time_element.element_info.name}")
+                random_time_element.click_input()
+                print("무작위 시간 선택 및 클릭 완료")
+            else:
+                print("캘린더 예약 시간 테이블에서 선택할 하위 요소를 찾을 수 없습니다.")
+        else:
+            print("AutomationId='calRsrv'를 가진 캘린더 예약 시간 테이블을 찾을 수 없습니다.")
+
     
     def consulting_write():
         consulting_window = ChartFunc.return_window
